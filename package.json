@@ -1,0 +1,30 @@
+{
+  "name": "jira-metrics-server",
+  "version": "0.1.0",
+  "main": "app.js",
+  "repository": "git@github.com:screamcha/jira-metrics-server.git",
+  "author": "screamcha",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@types/koa": "^2.0.52",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^24.9.0",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "koa": "^2.11.0"
+  },
+  "scripts": {
+    "start": "ts-node-dev --respawn --transpileOnly src/app.ts",
+    "test": "jest"
+  }
+}
