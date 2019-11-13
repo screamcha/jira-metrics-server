@@ -29,6 +29,6 @@
   },
   "scripts": {
     "start": "ts-node-dev --respawn --transpileOnly src/app.ts",
-    "test": "jest"
+    "test": "jest --watchAll --coverage"
   }
 }
