@@ -1,7 +1,18 @@
 import passport from 'koa-passport'
 import { Strategy as OAuth2Strategy, VerifyCallback } from 'passport-oauth2'
+import queryString from 'query-string'
 
-const authorizationURL = 'https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=SFs5mKYnFnM5B42iYmi0GnDpUmM88OFQ&scope=read%3Ajira-user&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fapi%2Fauth%2Fcallback&state=112&response_type=code&prompt=consent'
+const authorizationURL = `https://auth.atlassian.com/authorize?${queryString.stringify({
+  audience: 'api.atlassian.com',
+  client_id: process.env.JIRA_CLIENT_ID,
+  scope: 'read:jira-work read:jira-user read:me',
+  redirect_uri: 'http://localhost:4000/api/auth/callback',
+  state: '1488228',
+  response_type: 'code',
+  prompt: 'consent',
+})}`
+
+console.log(authorizationURL)
 
 export default () => {
   passport.use(new OAuth2Strategy({
