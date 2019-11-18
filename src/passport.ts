@@ -11,8 +11,7 @@ export default () => {
     clientSecret: process.env.JIRA_SECRET_KEY,
     callbackURL: 'http://localhost:4000/api/auth/callback',
   }, (accessToken: string, refreshToken: string, profile: any, cb: VerifyCallback) => {
-    console.log(accessToken, refreshToken, profile)
-    return cb(null, { lel: true })
+    return cb(null, { accessToken })
   }))
 
   return passport.initialize()
