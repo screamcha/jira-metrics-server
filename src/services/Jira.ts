@@ -1,31 +1,39 @@
 import axios, { AxiosInstance } from 'axios'
-import { IJiraService } from '../interfaces'
+import { JIRA_METRICS_API_URL } from '../constants'
+import { IJiraService, IUser } from '../interfaces'
 
-export class JiraService implements IJiraService {
-  accessToken: string
+class JiraService implements IJiraService {
   apiURL: string
   apiInstance: AxiosInstance
 
-  constructor (accessToken: string) {
-    this.accessToken = accessToken
+  constructor () {
     this.apiURL = process.env.JIRA_API_URL
 
     this.apiInstance = axios.create({
-      baseURL: `${this.apiURL}/ex/jira/${process.env.JIRA_METRICS_PROJECT_ID}/rest/api/2/`,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      baseURL: JIRA_METRICS_API_URL,
     })
   }
 
-  async currentUser () {
-    console.log(this.apiInstance)
+  async currentUser (token: string) {
     try {
-      const userInfo = await this.apiInstance.get('/myself')
-      console.log(userInfo)
-      return userInfo
+      const { data } = await this.apiInstance.get('/myself', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const user: IUser = {
+        email: data.emailAddress,
+        name: data.name,
+        key: data.key,
+      }
+
+      return user
     } catch (e) {
       console.log(e)
+      return null
     }
   }
 }
+
+export const jiraService = new JiraService()

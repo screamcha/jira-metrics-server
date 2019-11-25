@@ -471,6 +471,14 @@
   dependencies:
     "@types/node" "*"
 
+"@types/passport-http-bearer@^1.0.34":
+  version "1.0.34"
+  resolved "https://registry.yarnpkg.com/@types/passport-http-bearer/-/passport-http-bearer-1.0.34.tgz#872ddacfd8d9fb915f5be5c40e443a61bf377bc3"
+  integrity sha512-gCKSbXJb9H0e/GhoOcA3nWB8CtGel5lmQjKncgmCrad+7lEi59tPu3bgWqajwZ9hHbGZ0E4Y7D+jX9IWI8bFKA==
+  dependencies:
+    "@types/express" "*"
+    "@types/passport" "*"
+
 "@types/passport-oauth2@^1.4.8":
   version "1.4.8"
   resolved "https://registry.yarnpkg.com/@types/passport-oauth2/-/passport-oauth2-1.4.8.tgz#b11cb3323970a88db3d170fe3d4dcdd0af02d8bf"
@@ -3660,6 +3668,13 @@ pascalcase@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/pascalcase/-/pascalcase-0.1.1.tgz#b363e55e8006ca6fe21784d2db22bd15d7917f14"
   integrity sha1-s2PlXoAGym/iF4TS2yK9FdeRfxQ=
+
+passport-http-bearer@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/passport-http-bearer/-/passport-http-bearer-1.0.1.tgz#147469ea3669e2a84c6167ef99dbb77e1f0098a8"
+  integrity sha1-FHRp6jZp4qhMYWfvmdu3fh8AmKg=
+  dependencies:
+    passport-strategy "1.x.x"
 
 passport-oauth2@^1.5.0:
   version "1.5.0"
