@@ -1,12 +1,14 @@
-import { JiraService } from '../services/Jira'
-import { IAuthController, CustomJiraContext } from '../interfaces'
+import { IAuthController, CustomJiraContext, ISuccessAuthResponse } from '../interfaces'
 
 class AuthController implements IAuthController {
   async authenticate (ctx: CustomJiraContext) {
-    const jira = new JiraService(ctx.state.user.accessToken)
-    const a = await jira.currentUser()
-    console.log(a)
-    return ''
+    const { accessToken: token } = ctx.state.user
+
+    const response: ISuccessAuthResponse = {
+      token,
+    }
+
+    ctx.body = response
   }
 }
 

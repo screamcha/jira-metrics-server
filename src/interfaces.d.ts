@@ -1,19 +1,28 @@
 import { ParameterizedContext } from 'koa'
 import { AxiosInstance } from 'axios'
 
+export interface ISuccessAuthResponse {
+  token: string
+}
 export interface IJiraService {
   apiURL: string
   apiInstance: AxiosInstance
-  currentUser: () => any
+  currentUser: (token: string) => Promise<IUser>
 }
 
-interface JiraOauthState {
+export interface IUser {
+  email: string
+  name: string
+  key: string
+}
+
+interface IAuthState {
   user: {
     accessToken: string
   }
 }
 
-export type CustomJiraContext = ParameterizedContext<JiraOauthState>
+export type CustomJiraContext = ParameterizedContext<IAuthState>
 
 export interface IJiraAuthRequest {
   login: string
@@ -21,5 +30,5 @@ export interface IJiraAuthRequest {
 }
 
 export interface IAuthController {
-  authenticate: (ctx: CustomJiraContext) => Promise<string>
+  authenticate: (ctx: CustomJiraContext) => void
 }
