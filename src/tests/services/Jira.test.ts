@@ -1,4 +1,5 @@
 import nock from 'nock'
+import HttpCodes from 'http-status-codes'
 
 import { jiraService } from '../../services/Jira'
 import { JIRA_METRICS_API_URL } from '../../constants'
@@ -17,10 +18,10 @@ describe('Jira Service', () => {
       .get('/myself')
       .reply(function () {
         if (this.req.headers.authorization !== `Bearer ${testAuthToken}`) {
-          return [401, null]
+          return [HttpCodes.UNAUTHORIZED, null]
         }
 
-        return [200, {
+        return [HttpCodes.ACCEPTED, {
           emailAddress: 'test@test.com',
           displayName: 'Varok Saurfang',
           key: 'saurfang',
