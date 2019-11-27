@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import { JIRA_METRICS_API_URL } from '../constants'
-import { IJiraService, IUser } from '../interfaces'
+import { IJiraService, IUser, IGetMyselfResponse } from '../interfaces'
 
 class JiraService implements IJiraService {
   apiURL: string
@@ -8,15 +8,18 @@ class JiraService implements IJiraService {
 
   constructor () {
     this.apiURL = process.env.JIRA_API_URL
-
     this.apiInstance = axios.create({
       baseURL: JIRA_METRICS_API_URL,
     })
   }
 
   async currentUser (token: string) {
+    if (!token) {
+      return null
+    }
+
     try {
-      const { data } = await this.apiInstance.get('/myself', {
+      const { data }: IGetMyselfResponse = await this.apiInstance.get('/myself', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -24,13 +27,12 @@ class JiraService implements IJiraService {
 
       const user: IUser = {
         email: data.emailAddress,
-        name: data.name,
+        name: data.displayName,
         key: data.key,
       }
 
       return user
     } catch (e) {
-      console.log(e)
       return null
     }
   }

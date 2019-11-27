@@ -32,3 +32,13 @@ export interface IJiraAuthRequest {
 export interface IAuthController {
   authenticate: (ctx: CustomJiraContext) => void
 }
+
+export interface IGetMyselfFields {
+  emailAddress: string
+  displayName: string
+  key: string
+}
+
+export interface IGetMyselfResponse extends IGetMyselfFields {
+  [key: string]: any
+}
