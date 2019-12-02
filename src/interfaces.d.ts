@@ -1,19 +1,11 @@
 import { ParameterizedContext } from 'koa'
-import { AxiosInstance } from 'axios'
 
 export interface ISuccessAuthResponse {
   token: string
 }
-export interface IJiraService {
-  apiURL: string
-  apiInstance: AxiosInstance
-  currentUser: (token: string) => Promise<IUser>
-}
 
-export interface IUser {
-  email: string
-  name: string
-  key: string
+export enum EIssueType {
+  Bug
 }
 
 interface IAuthState {

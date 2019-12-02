@@ -3,14 +3,9 @@ import HttpCodes from 'http-status-codes'
 
 import { jiraService } from '../../services/Jira'
 import { JIRA_METRICS_API_URL } from '../../constants'
-import { IUser } from '../..//interfaces'
+import { IUser, EIssueType } from '../../services/Jira.d'
 
 describe('Jira Service', () => {
-  const testUser: IUser = {
-    email: 'test@test.com',
-    name: 'Varok Saurfang',
-    key: 'saurfang',
-  }
   const testAuthToken = 'test-auth-key'
 
   beforeAll(() => {
@@ -30,6 +25,12 @@ describe('Jira Service', () => {
   })
 
   describe('currentUser method', () => {
+    const testUser: IUser = {
+      email: 'test@test.com',
+      name: 'Varok Saurfang',
+      key: 'saurfang',
+    }
+
     it('returns user if token is correct', async () => {
       const result = await jiraService.currentUser(testAuthToken)
 
@@ -46,6 +47,29 @@ describe('Jira Service', () => {
       const result = await jiraService.currentUser('')
 
       expect(result).toBeNull()
+    })
+  })
+
+  describe('getIssues method', () => {
+    it('returns array of issues for given parameters', async () => {
+      console.log(EIssueType.Bug)
+      const testParameters = {
+        startDate: new Date(2019, 1, 1),
+        endDate: new Date(2019, 12, 31),
+        issueType: EIssueType.Bug,
+      }
+      const resultIssues = [
+        {
+          title: 'issue-1',
+        },
+        {
+          title: 'issue-2',
+        }
+      ]
+
+      const result = await jiraService.getIssues(testAuthToken, testParameters)
+
+      expect(result).toEqual(resultIssues)
     })
   })
 })
