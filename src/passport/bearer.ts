@@ -8,5 +8,5 @@ export default new BearerStrategy(async (token: string, done: Function) => {
     return done('Invalid user')
   }
 
-  return done(null, user)
+  return done(null, { accessToken: token })
 })
