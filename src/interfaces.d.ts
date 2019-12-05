@@ -1,24 +1,16 @@
 import { ParameterizedContext } from 'koa'
 
-export interface ISuccessAuthResponse {
-  token: string
-}
-
-interface IAuthState {
+interface IContextState {
   user: {
     accessToken: string
   }
 }
 
-export type CustomJiraContext = ParameterizedContext<IAuthState>
+export type Context = ParameterizedContext<IContextState>
 
 export interface IJiraAuthRequest {
   login: string
   password: string
-}
-
-export interface IAuthController {
-  authenticate: (ctx: CustomJiraContext) => void
 }
 
 export interface IGetMyselfFields {

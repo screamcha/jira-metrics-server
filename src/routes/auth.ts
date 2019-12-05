@@ -1,7 +1,7 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
 
-import authController from '../controllers/auth'
+import { authController } from '../controllers/auth'
 
 import { IAuthState } from '../interfaces'
 import { Context } from 'koa'
