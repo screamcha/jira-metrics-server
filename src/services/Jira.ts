@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { format } from 'date-fns'
+import { format, isWithinInterval } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
 
 export enum EIssueType {
@@ -27,14 +27,14 @@ export interface IUser {
 
 export interface IIssue {
   title: string,
-  changelog: {
-    histories: IChangelogItem[]
-  }
+  changelog: IChangelogItem[]
 }
 
 interface IChangelogItem {
   id: string
   author: IUser
+  created: string
+  items: any
 }
 
 class JiraService implements IJiraService {
@@ -75,23 +75,39 @@ class JiraService implements IJiraService {
   async getIssues (token: string, { issueType, startDate, endDate }: IIssueParameters) {
     const dateFormat = 'yyyy-MM-dd'
     const jqlQuery = `
-      issueType = ${issueType} 
-        AND status in (Dev-complete, Discarded) 
-        AND updated >= ${format(startDate, dateFormat)}
-        AND updated <= ${format(endDate, dateFormat)}
+      issuetype = ${issueType}
+        AND status in (Dev-complete, Discarded)
+        AND
+          (updated >= ${format(startDate, dateFormat)}
+          AND updated <= ${format(endDate, dateFormat)})
+        OR
+          (created >= ${format(startDate, dateFormat)}
+          AND created <= ${format(endDate, dateFormat)})
     `
     const expandFields = ['changelog']
 
     const { data } = await this.apiInstance.post('/search', {
       jql: jqlQuery,
       expand: expandFields,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
 
     return data.issues.map((
-      { title, changelog }: { title: string, changelog: Object }
-    ) => (
-      { title, changelog }
-    ))
+      { key, changelog }: { key: string, changelog: { histories: IChangelogItem[] } }
+    ) => {
+      const filteredChangelog = changelog.histories
+        .filter((historyItem: IChangelogItem) => (
+          isWithinInterval(new Date(historyItem.created), {
+            start: startDate, end: endDate,
+          }
+          ))
+        )
+      return { title: key, changelog: filteredChangelog }
+    }
+    )
   }
 }
 
