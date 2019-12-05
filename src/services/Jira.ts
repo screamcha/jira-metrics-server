@@ -2,8 +2,32 @@ import axios, { AxiosInstance } from 'axios'
 import { format } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
 
-import { IJiraService, IIssueParameters, IUser } from './Jira.d'
-import { EIssueType } from '../interfaces.d'
+export enum EIssueType {
+  Bug = 'Bug'
+}
+
+export interface IJiraService {
+  apiURL: string
+  apiInstance: AxiosInstance
+  currentUser: (token: string) => Promise<IUser>
+  getIssues: (token: string, parameters: IIssueParameters) => Promise<Array<IIssue>>
+}
+
+export interface IIssueParameters {
+  issueType: EIssueType
+  startDate: Date
+  endDate: Date
+}
+
+export interface IUser {
+  email: string
+  name: string
+  key: string
+}
+
+export interface IIssue {
+  title: string
+}
 
 class JiraService implements IJiraService {
   apiURL: string
@@ -17,8 +41,6 @@ class JiraService implements IJiraService {
   }
 
   async currentUser (token: string) {
-    // const a = EIssueType.Bug
-    // console.log(EIssueType)
     if (!token) {
       return null
     }
@@ -43,7 +65,7 @@ class JiraService implements IJiraService {
   }
 
   async getIssues (token: string, { issueType, startDate, endDate }: IIssueParameters) {
-    const dateFormat = 'YYYY-MM-DD'
+    const dateFormat = 'yyyy-MM-dd'
     const jqlQuery = `
       issueType = ${issueType} 
         AND status in (Dev-complete, Discarded) 
@@ -57,7 +79,6 @@ class JiraService implements IJiraService {
       expand: expandFields,
     })
 
-    console.log(data)
     return data.issues.map((issue: { key: string }) => ({ title: issue.key }))
   }
 }

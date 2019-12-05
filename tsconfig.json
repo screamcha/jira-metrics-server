@@ -3,11 +3,12 @@
       "module": "commonjs",
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
-      "target": "esnext",
+      "target": "es6",
       "noImplicitAny": true,
       "moduleResolution": "node",
       "sourceMap": true,
       "outDir": "dist",
+      "noEmit": false,
       "baseUrl": ".",
       "paths": {
           "*": [

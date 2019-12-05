@@ -1,12 +1,31 @@
 import nock from 'nock'
 import HttpCodes from 'http-status-codes'
+import { format } from 'date-fns'
 
-import { jiraService } from '../../services/Jira'
-import { JIRA_METRICS_API_URL } from '../../constants'
-import { IUser, EIssueType } from '../../services/Jira.d'
+import { jiraService, IUser, EIssueType } from '../../services/Jira'
+import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../../constants'
 
 describe('Jira Service', () => {
   const testAuthToken = 'test-auth-key'
+  const testIssueParameters = {
+    jql: `
+      issueType = ${EIssueType.Bug} 
+        AND status in (Dev-complete, Discarded) 
+        AND updated >= ${format(new Date('2019-01-01'), DATE_FORMAT)}
+        AND updated <= ${format(new Date('2019-12-31'), DATE_FORMAT)}
+    `,
+    expand: ['changelog'],
+  }
+  const resultIssues = {
+    issues: [
+      {
+        key: 'issue-1',
+      },
+      {
+        key: 'issue-2',
+      }
+    ],
+  }
 
   beforeAll(() => {
     nock(JIRA_METRICS_API_URL)
@@ -22,6 +41,8 @@ describe('Jira Service', () => {
           key: 'saurfang',
         }]
       })
+      .post('/search', testIssueParameters)
+      .reply(200, resultIssues)
   })
 
   describe('currentUser method', () => {
@@ -52,13 +73,12 @@ describe('Jira Service', () => {
 
   describe('getIssues method', () => {
     it('returns array of issues for given parameters', async () => {
-      console.log(EIssueType.Bug)
       const testParameters = {
-        startDate: new Date(2019, 1, 1),
-        endDate: new Date(2019, 12, 31),
+        startDate: new Date(2019, 0, 1),
+        endDate: new Date(2019, 11, 31),
         issueType: EIssueType.Bug,
       }
-      const resultIssues = [
+      const testResult = [
         {
           title: 'issue-1',
         },
@@ -69,7 +89,7 @@ describe('Jira Service', () => {
 
       const result = await jiraService.getIssues(testAuthToken, testParameters)
 
-      expect(result).toEqual(resultIssues)
+      expect(result).toEqual(testResult)
     })
   })
 })

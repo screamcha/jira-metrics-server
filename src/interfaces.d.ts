@@ -4,10 +4,6 @@ export interface ISuccessAuthResponse {
   token: string
 }
 
-export enum EIssueType {
-  Bug
-}
-
 interface IAuthState {
   user: {
     accessToken: string
