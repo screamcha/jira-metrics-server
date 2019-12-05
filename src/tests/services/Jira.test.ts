@@ -19,10 +19,18 @@ describe('Jira Service', () => {
   const resultIssues = {
     issues: [
       {
-        key: 'issue-1',
-      },
-      {
-        key: 'issue-2',
+        title: 'issue-1',
+        changelog: {
+          histories: [
+            {
+              id: '111',
+              author: {
+                name: 'Thrall',
+                key: 'thrall-horde',
+              },
+            }
+          ],
+        },
       }
     ],
   }
@@ -81,9 +89,17 @@ describe('Jira Service', () => {
       const testResult = [
         {
           title: 'issue-1',
-        },
-        {
-          title: 'issue-2',
+          changelog: {
+            histories: [
+              {
+                id: '111',
+                author: {
+                  name: 'Thrall',
+                  key: 'thrall-horde',
+                },
+              }
+            ],
+          },
         }
       ]
 
