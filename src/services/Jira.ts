@@ -20,13 +20,21 @@ export interface IIssueParameters {
 }
 
 export interface IUser {
-  email: string
+  email?: string
   name: string
   key: string
 }
 
 export interface IIssue {
-  title: string
+  title: string,
+  changelog: {
+    histories: IChangelogItem[]
+  }
+}
+
+interface IChangelogItem {
+  id: string
+  author: IUser
 }
 
 class JiraService implements IJiraService {
@@ -79,7 +87,11 @@ class JiraService implements IJiraService {
       expand: expandFields,
     })
 
-    return data.issues.map((issue: { key: string }) => ({ title: issue.key }))
+    return data.issues.map((
+      { title, changelog }: { title: string, changelog: Object }
+    ) => (
+      { title, changelog }
+    ))
   }
 }
 

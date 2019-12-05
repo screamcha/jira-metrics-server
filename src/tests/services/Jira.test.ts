@@ -2,7 +2,7 @@ import nock from 'nock'
 import HttpCodes from 'http-status-codes'
 import { format } from 'date-fns'
 
-import { jiraService, IUser, EIssueType } from '../../services/Jira'
+import { jiraService, IUser, EIssueType, IIssue } from '../../services/Jira'
 import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../../constants'
 
 describe('Jira Service', () => {
@@ -86,7 +86,7 @@ describe('Jira Service', () => {
         endDate: new Date(2019, 11, 31),
         issueType: EIssueType.Bug,
       }
-      const testResult = [
+      const testResult: IIssue[] = [
         {
           title: 'issue-1',
           changelog: {
