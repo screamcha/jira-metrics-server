@@ -2,40 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import { format, isWithinInterval } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
 
-export enum EIssueType {
-  Bug = 'Bug'
-}
-
-export interface IJiraService {
-  apiURL: string
-  apiInstance: AxiosInstance
-  currentUser: (token: string) => Promise<IUser>
-  getIssues: (token: string, parameters: IIssueParameters) => Promise<Array<IIssue>>
-}
-
-export interface IIssueParameters {
-  issueType: EIssueType
-  startDate: Date
-  endDate: Date
-}
-
-export interface IUser {
-  email?: string
-  name: string
-  key: string
-}
-
-export interface IIssue {
-  title: string,
-  changelog: IChangelogItem[]
-}
-
-interface IChangelogItem {
-  id: string
-  author: IUser
-  created: string
-  items: any
-}
+import { IJiraService, IUser, IIssueParameters, EIssueType, IChangelogItem, ISearchResult, IIssue } from './Jira.model'
 
 class JiraService implements IJiraService {
   apiURL: string
@@ -72,43 +39,102 @@ class JiraService implements IJiraService {
     }
   }
 
-  async getIssues (token: string, { issueType, startDate, endDate }: IIssueParameters) {
+  async getIssues (token: string, { issueTypes, startDate, endDate, userKey }: IIssueParameters) {
     const dateFormat = 'yyyy-MM-dd'
+    const issueTypesString = issueTypes
+      .reduce(
+        (result: string, next: string) => `${result}, '${next}'`, ''
+      ).slice(2)
+
     const jqlQuery = `
-      issuetype = ${issueType}
+      issuetype in (${issueTypesString})
         AND status in (Dev-complete, Discarded)
         AND
-          (updated >= ${format(startDate, dateFormat)}
-          AND updated <= ${format(endDate, dateFormat)})
-        OR
-          (created >= ${format(startDate, dateFormat)}
-          AND created <= ${format(endDate, dateFormat)})
+          (
+            (updated >= ${format(startDate, dateFormat)}
+            AND updated <= ${format(endDate, dateFormat)})
+          OR
+            (created >= ${format(startDate, dateFormat)}
+            AND created <= ${format(endDate, dateFormat)})
+          )
+        AND
+          assignee = ${userKey}
     `
     const expandFields = ['changelog']
+    const fields = ['issuelinks']
 
-    const { data } = await this.apiInstance.post('/search', {
+    const { data }: { data: ISearchResult } = await this.apiInstance.post('/search', {
       jql: jqlQuery,
       expand: expandFields,
+      fields,
     }, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
 
-    return data.issues.map((
-      { key, changelog }: { key: string, changelog: { histories: IChangelogItem[] } }
-    ) => {
-      const filteredChangelog = changelog.histories
-        .filter((historyItem: IChangelogItem) => (
+    // console.log(data.issues[0].fields)
+    // return data.issues[0].fields
+
+    const issuesWithBugs = data.issues
+      .filter((issue: any) => {
+        const linkedBugs = issue.fields.issuelinks.filter((link: any) => (
+          link.outwardIssue.fields.issuetype.id === EIssueType.Bug
+        ))
+
+        return linkedBugs.length
+      })
+
+    const formattedIssues: IIssue[] = issuesWithBugs.map((issue: any) => {
+      const filteredChangelog = issue.changelog.histories
+        .filter((historyItem: any) => (
           isWithinInterval(new Date(historyItem.created), {
             start: startDate, end: endDate,
-          }
-          ))
+          }) &&
+          historyItem.items.filter((item: any) => item.fieldId === 'timespent')
         )
-      return { title: key, changelog: filteredChangelog }
-    }
-    )
+        ).map((historyItem: IChangelogItem) => historyItem.items)
+
+      const linkedBugs = issue.fields.issuelinks.filter((link: any) => (
+        link.outwardIssue.fields.issuetype.id === EIssueType.Bug
+      ))
+
+      return {
+        title: issue.key,
+        changelog: filteredChangelog,
+        linkedIssues: linkedBugs,
+      }
+    })
+
+    return formattedIssues
   }
+
+  // private mapIssues (issues: any, { startDate, endDate }) {
+  //   return issues.map((issue: any) => {
+  //     const filteredChangelog = issue.changelog.histories
+  //       .filter((historyItem: IChangelogItem) => (
+  //         isWithinInterval(new Date(historyItem.created), {
+  //           start: startDate, end: endDate,
+  //         }) &&
+  //         historyItem.items.filter((item: any) => item.fieldId === 'timespent')
+  //       )
+  //       ).map((historyItem: IChangelogItem) => historyItem.items)
+
+  //     return { title: issue.key, changelog: filteredChangelog, fields: issue.fields }
+  //   })
+  // }
+
+  // private filterIssuesWithBugs (issues: any) {
+  //   return issues.filter((issue: any) => {
+  //     const issueLinks = issue.fields.issuelinks
+
+  //     const linkedBugs = issueLinks.filter((link: any) => (
+  //       link.outwardIssue.fields.issuetype.name === EIssueType.Bug
+  //     ))
+
+  //     return linkedBugs.length
+  //   })
+  // }
 }
 
 export const jiraService = new JiraService()
