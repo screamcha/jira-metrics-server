@@ -2,11 +2,44 @@ import axios, { AxiosInstance } from 'axios'
 import { format, isWithinInterval } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
 
-import { IJiraService, IUser, IIssueParameters, EIssueType, IChangelogItem, ISearchResult, IIssue } from './Jira.model'
+import { IJiraService, IUser, IIssueParameters, EIssueType, IChangelogItem, IIssue } from './Jira.model'
+import { IJiraApiSearchResult, IJiraApiIssue, IJiraApiIssueLink, IJiraApiHistoryItem } from '../models/JiraApi.model'
 
 class JiraService implements IJiraService {
   apiURL: string
   apiInstance: AxiosInstance
+
+  static mapJiraApiIssue (issue: IJiraApiIssue) {
+    const mappedIssue: IIssue = {
+      title: issue.key,
+    }
+
+    if (issue.fields.issuelinks) {
+      mappedIssue.linkedIssues = issue.fields.issuelinks.map((link) => this.mapJiraApiIssue(link.outwardIssue))
+    }
+
+    if (issue.changelog) {
+      mappedIssue.changelog = issue.changelog.histories
+        .map((historyItem: IJiraApiHistoryItem) => {
+          const timeSpentItem = historyItem.items.find((changeItem) => changeItem.field === 'timespent')
+
+          if (!timeSpentItem) {
+            return null
+          }
+
+          return {
+            created: historyItem.created,
+            author: historyItem.author,
+            field: timeSpentItem.field,
+            from: timeSpentItem.from,
+            to: timeSpentItem.to,
+          }
+        })
+        .filter((item: IChangelogItem) => !!item)
+    }
+
+    return mappedIssue
+  }
 
   constructor () {
     this.apiURL = process.env.JIRA_API_URL
@@ -44,7 +77,7 @@ class JiraService implements IJiraService {
     const issueTypesString = issueTypes
       .reduce(
         (result: string, next: string) => `${result}, '${next}'`, ''
-      ).slice(2)
+      ).slice(2) // move to utils
 
     const jqlQuery = `
       issuetype in (${issueTypesString})
@@ -63,7 +96,7 @@ class JiraService implements IJiraService {
     const expandFields = ['changelog']
     const fields = ['issuelinks']
 
-    const { data }: { data: ISearchResult } = await this.apiInstance.post('/search', {
+    const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
       jql: jqlQuery,
       expand: expandFields,
       fields,
@@ -73,67 +106,36 @@ class JiraService implements IJiraService {
       },
     })
 
-    // console.log(data.issues[0].fields)
-    // return data.issues[0].fields
+    const resultIssues = data.issues.map(issue => JiraService.mapJiraApiIssue(issue))
 
-    const issuesWithBugs = data.issues
-      .filter((issue: any) => {
-        const linkedBugs = issue.fields.issuelinks.filter((link: any) => (
-          link.outwardIssue.fields.issuetype.id === EIssueType.Bug
-        ))
-
-        return linkedBugs.length
-      })
-
-    const formattedIssues: IIssue[] = issuesWithBugs.map((issue: any) => {
-      const filteredChangelog = issue.changelog.histories
-        .filter((historyItem: any) => (
-          isWithinInterval(new Date(historyItem.created), {
-            start: startDate, end: endDate,
-          }) &&
-          historyItem.items.filter((item: any) => item.fieldId === 'timespent')
-        )
-        ).map((historyItem: IChangelogItem) => historyItem.items)
-
-      const linkedBugs = issue.fields.issuelinks.filter((link: any) => (
-        link.outwardIssue.fields.issuetype.id === EIssueType.Bug
-      ))
-
-      return {
-        title: issue.key,
-        changelog: filteredChangelog,
-        linkedIssues: linkedBugs,
-      }
-    })
-
-    return formattedIssues
+    return resultIssues
   }
 
-  // private mapIssues (issues: any, { startDate, endDate }) {
-  //   return issues.map((issue: any) => {
-  //     const filteredChangelog = issue.changelog.histories
-  //       .filter((historyItem: IChangelogItem) => (
-  //         isWithinInterval(new Date(historyItem.created), {
-  //           start: startDate, end: endDate,
-  //         }) &&
-  //         historyItem.items.filter((item: any) => item.fieldId === 'timespent')
-  //       )
-  //       ).map((historyItem: IChangelogItem) => historyItem.items)
-
-  //     return { title: issue.key, changelog: filteredChangelog, fields: issue.fields }
-  //   })
-  // }
-
-  // private filterIssuesWithBugs (issues: any) {
-  //   return issues.filter((issue: any) => {
-  //     const issueLinks = issue.fields.issuelinks
-
-  //     const linkedBugs = issueLinks.filter((link: any) => (
-  //       link.outwardIssue.fields.issuetype.name === EIssueType.Bug
+  // private mapJiraApiccIssues (issues: IJiraApiIssue[], { startDate, endDate }: { startDate: Date, endDate: Date }) {
+  //   const mappedIssues = issues.map((issue: IJiraApiIssue): IIssue | null => {
+  //     const linkedBugs = issue.fields.issuelinks.filter((link: any) => (
+  //       link.outwardIssue.fields.issuetype.id === EIssueType.Bug
   //     ))
 
-  //     return linkedBugs.length
+  //     if (!linkedBugs.length) {
+  //       return null
+  //     }
+
+  //     const filteredChangelog = issue.changelog.histories
+  //       .filter((historyItem: IJiraApiHistoryItem) => (
+  //         isWithinInterval(new Date(historyItem.created), { start: startDate, end: endDate }) &&
+  //         historyItem.items.filter((item: any) => item.field === 'timespent')
+  //       ))
+  //       .reduce((result: IChangelogItem[], next: IJiraApiHistoryItem) => result.concat(...next.items), [])
+
+  //     return {
+  //       title: issue.key,
+  //       changelog: filteredChangelog,
+  //       linkedIssues: linkedBugs,
+  //     }
   //   })
+
+  //   return mappedIssues.filter((issue: IIssue | null) => !!issue)
   // }
 }
 
