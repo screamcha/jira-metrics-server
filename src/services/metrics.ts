@@ -1,8 +1,10 @@
-import { jiraService, EIssueType } from './Jira'
+import { jiraService } from './Jira'
+import { EIssueType } from './Jira.model'
 
 interface IComputeValueVsBugsMetricParams {
   startDate: Date
   endDate: Date
+  userKey: string
 }
 
 interface IMetricsService {
@@ -15,15 +17,17 @@ interface IMetricsService {
 class MetricsService implements IMetricsService {
   async computeValueVsBugsMetric (
     token: string,
-    { startDate, endDate }: IComputeValueVsBugsMetricParams
+    { startDate, endDate, userKey }: IComputeValueVsBugsMetricParams
   ) {
+    // #1 - get tasks for person for period
     const result = await jiraService.getIssues(token, {
-      issueType: EIssueType.Bug,
+      issueTypes: [EIssueType.Dev, EIssueType.Epic, EIssueType.Story],
       startDate,
       endDate,
+      userKey,
     })
 
-    console.log(result[0].changelog)
+    return result
   }
 }
 
