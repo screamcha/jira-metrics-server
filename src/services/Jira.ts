@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from 'axios'
-import { format, isWithinInterval } from 'date-fns'
+import { format } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
 
-import { IJiraService, IUser, IIssueParameters, EIssueType, IChangelogItem, IIssue } from './Jira.model'
-import { IJiraApiSearchResult, IJiraApiIssue, IJiraApiIssueLink, IJiraApiHistoryItem } from '../models/JiraApi.model'
+import { IJiraService, IUser, IIssueParameters, IChangelogItem, IIssue } from './Jira.model'
+import { IJiraApiSearchResult, IJiraApiIssue, IJiraApiHistoryItem, IJiraApiUser } from '../models/JiraApi.model'
 
 class JiraService implements IJiraService {
   apiURL: string
@@ -29,7 +29,7 @@ class JiraService implements IJiraService {
 
           return {
             created: historyItem.created,
-            author: historyItem.author,
+            author: JiraService.mapJiraApiUser(historyItem.author),
             field: timeSpentItem.field,
             from: timeSpentItem.from,
             to: timeSpentItem.to,
@@ -46,6 +46,14 @@ class JiraService implements IJiraService {
     this.apiInstance = axios.create({
       baseURL: JIRA_METRICS_API_URL,
     })
+  }
+
+  static mapJiraApiUser (user: IJiraApiUser): IUser {
+    return {
+      name: user.displayName,
+      email: user.emailAddress,
+      key: user.key,
+    }
   }
 
   async currentUser (token: string) {
@@ -110,33 +118,6 @@ class JiraService implements IJiraService {
 
     return resultIssues
   }
-
-  // private mapJiraApiccIssues (issues: IJiraApiIssue[], { startDate, endDate }: { startDate: Date, endDate: Date }) {
-  //   const mappedIssues = issues.map((issue: IJiraApiIssue): IIssue | null => {
-  //     const linkedBugs = issue.fields.issuelinks.filter((link: any) => (
-  //       link.outwardIssue.fields.issuetype.id === EIssueType.Bug
-  //     ))
-
-  //     if (!linkedBugs.length) {
-  //       return null
-  //     }
-
-  //     const filteredChangelog = issue.changelog.histories
-  //       .filter((historyItem: IJiraApiHistoryItem) => (
-  //         isWithinInterval(new Date(historyItem.created), { start: startDate, end: endDate }) &&
-  //         historyItem.items.filter((item: any) => item.field === 'timespent')
-  //       ))
-  //       .reduce((result: IChangelogItem[], next: IJiraApiHistoryItem) => result.concat(...next.items), [])
-
-  //     return {
-  //       title: issue.key,
-  //       changelog: filteredChangelog,
-  //       linkedIssues: linkedBugs,
-  //     }
-  //   })
-
-  //   return mappedIssues.filter((issue: IIssue | null) => !!issue)
-  // }
 }
 
 export const jiraService = new JiraService()

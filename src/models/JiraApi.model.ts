@@ -22,8 +22,8 @@ export interface IJiraApiHistoryItem {
   items: IJiraApiHistoryChangeItem[]
 }
 
-interface IJiraApiUser {
-  name: string
+export interface IJiraApiUser {
+  displayName: string
   key: string
   emailAddress: string
 }
