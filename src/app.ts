@@ -5,6 +5,14 @@ import passportSetup from './passport'
 
 const app = new Koa()
 
+app.use(async (ctx, next) => {
+  try {
+    await next()
+  } catch (error) {
+    console.error(error)
+    ctx.status = 500
+  }
+})
 app.use(passportSetup())
 app.use(router.routes())
 
