@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 import { format } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
+import { getJqlInString } from '../utils'
 
 import { IJiraService, IUser, IIssueParameters, IChangelogItem, IIssue } from './Jira.model'
 import { IJiraApiSearchResult, IJiraApiIssue, IJiraApiHistoryItem, IJiraApiUser } from '../models/JiraApi.model'
@@ -82,10 +83,7 @@ class JiraService implements IJiraService {
 
   async getIssues (token: string, { issueTypes, startDate, endDate, userKey }: IIssueParameters) {
     const dateFormat = 'yyyy-MM-dd'
-    const issueTypesString = issueTypes
-      .reduce(
-        (result: string, next: string) => `${result}, '${next}'`, ''
-      ).slice(2) // move to utils
+    const issueTypesString = getJqlInString(issueTypes)
 
     const jqlQuery = `
       issuetype in (${issueTypesString})
@@ -114,9 +112,7 @@ class JiraService implements IJiraService {
       },
     })
 
-    const resultIssues = data.issues.map(issue => JiraService.mapJiraApiIssue(issue))
-
-    return resultIssues
+    return data.issues.map(issue => JiraService.mapJiraApiIssue(issue))
   }
 }
 
