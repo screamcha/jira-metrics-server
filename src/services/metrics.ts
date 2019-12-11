@@ -1,5 +1,5 @@
 import { jiraService } from './Jira'
-import { EIssueType } from '../models/Jira.model'
+import { EIssueType, IIssue, IChangelogItem } from '../models/Jira.model'
 
 interface IComputeValueVsBugsMetricParams {
   startDate: Date
@@ -20,14 +20,33 @@ class MetricsService implements IMetricsService {
     { startDate, endDate, userKey }: IComputeValueVsBugsMetricParams
   ) {
     // #1 - get tasks for person for period
-    const result = await jiraService.getIssues(token, {
+    const issues = await jiraService.getIssues(token, {
       issueTypes: [EIssueType.Dev, EIssueType.Epic, EIssueType.Story],
       startDate,
       endDate,
       userKey,
     })
 
-    return result
+    // #2 - compute time spent on issues with bugs
+    const issuesWithBugs = issues.filter((issue: IIssue) => (
+      issue.linkedIssues.some(
+        ({ type }) => type === EIssueType.Bug
+      )
+    ))
+
+    const timeSpentOnIssues = issuesWithBugs.reduce(
+      (result: number, issue: IIssue) => {
+        const timeSpentOnIssue = issue.changelog.reduce(
+          (result: number, item: IChangelogItem) => (
+            result + Number(item.to) - Number(item.from)
+          ), 0
+        )
+
+        return result + timeSpentOnIssue
+      }, 0
+    )
+
+    return timeSpentOnIssues
   }
 }
 
