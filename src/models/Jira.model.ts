@@ -28,7 +28,8 @@ export interface IUser {
 }
 
 export interface IIssue {
-  title: string,
+  title: string
+  type: string
   changelog?: IChangelogItem[]
   linkedIssues?: IIssue[]
 }

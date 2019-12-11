@@ -3,7 +3,7 @@ import { format, isWithinInterval } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
 import { getJqlInString } from '../utils'
 
-import { IJiraService, IUser, IIssueParameters, IChangelogItem, IIssue } from './Jira.model'
+import { IJiraService, IUser, IIssueParameters, IChangelogItem, IIssue } from '../models/Jira.model'
 import { IJiraApiSearchResult, IJiraApiIssue, IJiraApiHistoryItem, IJiraApiUser } from '../models/JiraApi.model'
 
 class JiraService implements IJiraService {
@@ -13,6 +13,7 @@ class JiraService implements IJiraService {
   static mapJiraApiIssue (issue: IJiraApiIssue) {
     const mappedIssue: IIssue = {
       title: issue.key,
+      type: issue.fields.issuetype.id,
     }
 
     if (issue.fields.issuelinks) {
@@ -100,7 +101,7 @@ class JiraService implements IJiraService {
           assignee = ${userKey}
     `
     const expandFields = ['changelog']
-    const fields = ['issuelinks']
+    const fields = ['issuelinks', 'issuetype']
 
     const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
       jql: jqlQuery,

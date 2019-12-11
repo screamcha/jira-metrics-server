@@ -1,5 +1,5 @@
 import { jiraService } from './Jira'
-import { EIssueType } from './Jira.model'
+import { EIssueType } from '../models/Jira.model'
 
 interface IComputeValueVsBugsMetricParams {
   startDate: Date
