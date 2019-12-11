@@ -43,19 +43,19 @@ class JiraService implements IJiraService {
     return mappedIssue
   }
 
-  constructor () {
-    this.apiURL = process.env.JIRA_API_URL
-    this.apiInstance = axios.create({
-      baseURL: JIRA_METRICS_API_URL,
-    })
-  }
-
   static mapJiraApiUser (user: IJiraApiUser): IUser {
     return {
       name: user.displayName,
       email: user.emailAddress,
       key: user.key,
     }
+  }
+
+  constructor () {
+    this.apiURL = process.env.JIRA_API_URL
+    this.apiInstance = axios.create({
+      baseURL: JIRA_METRICS_API_URL,
+    })
   }
 
   async currentUser (token: string) {
