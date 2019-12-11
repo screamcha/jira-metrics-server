@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
-import { format } from 'date-fns'
+import { format, isWithinInterval } from 'date-fns'
 import { JIRA_METRICS_API_URL } from '../constants'
 import { getJqlInString } from '../utils'
 
@@ -112,7 +112,15 @@ class JiraService implements IJiraService {
       },
     })
 
-    return data.issues.map(issue => JiraService.mapJiraApiIssue(issue))
+    return data.issues.map(issue => {
+      const mappedIssue = JiraService.mapJiraApiIssue(issue)
+      if (mappedIssue.changelog) {
+        mappedIssue.changelog = mappedIssue.changelog.filter(
+          ({ created }) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
+        )
+      }
+      return mappedIssue
+    })
   }
 }
 
