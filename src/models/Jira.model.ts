@@ -12,13 +12,15 @@ export interface IJiraService {
   apiInstance: AxiosInstance
   currentUser: (token: string) => Promise<IUser>
   getIssues: (token: string, parameters: IIssueParameters) => Promise<IIssue[]>
+  getIssuesByIds: (token: string, parameters: IIssueParameters) => Promise<IIssue[]>
 }
 
 export interface IIssueParameters {
-  issueTypes: EIssueType[]
+  issueTypes?: EIssueType[]
+  issueIds?: string[]
   startDate: Date
   endDate: Date
-  userKey: string
+  userKey?: string
 }
 
 export interface IUser {

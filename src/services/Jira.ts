@@ -123,6 +123,37 @@ class JiraService implements IJiraService {
       return mappedIssue
     })
   }
+
+  async getIssuesByIds (token: string, { issueIds, startDate, endDate }: IIssueParameters) {
+    const issueKeysString = getJqlInString(issueIds)
+
+    const jqlQuery = `
+      issueKey IN (${issueKeysString})
+    `
+
+    const expandFields = ['changelog']
+    const fields = ['issuetype']
+
+    const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
+      jql: jqlQuery,
+      expand: expandFields,
+      fields,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return data.issues.map(issue => {
+      const mappedIssue = JiraService.mapJiraApiIssue(issue)
+      if (mappedIssue.changelog) {
+        mappedIssue.changelog = mappedIssue.changelog.filter(
+          ({ created }) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
+        )
+      }
+      return mappedIssue
+    })
+  }
 }
 
 export const jiraService = new JiraService()
