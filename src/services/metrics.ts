@@ -1,20 +1,22 @@
 import { jiraService } from './Jira'
+import { ratios } from '../constants'
+
+import { IMetricsService, IComputeValueVsBugsMetricParams } from '../models/Metrics.model'
 import { EIssueType, IIssue, IChangelogItem } from '../models/Jira.model'
 
-interface IComputeValueVsBugsMetricParams {
-  startDate: Date
-  endDate: Date
-  userKey: string
-}
-
-interface IMetricsService {
-  computeValueVsBugsMetric: (
-    token: string,
-    params: IComputeValueVsBugsMetricParams
-  ) => void
-}
-
 class MetricsService implements IMetricsService {
+  static getResultOfRatio (ratio: number) {
+    let result = ''
+
+    ratios.forEach((templateRatio: { value: number, result: string }) => {
+      if (ratio < templateRatio.value) {
+        result = templateRatio.result
+      }
+    })
+
+    return result
+  }
+
   async computeValueVsBugsMetric (
     token: string,
     { startDate, endDate, userKey }: IComputeValueVsBugsMetricParams
@@ -67,10 +69,14 @@ class MetricsService implements IMetricsService {
       }, 0
     )
 
+    const ratio = timeSpentOnIssues / timeSpentOnBugs
+    const ratioResult = MetricsService.getResultOfRatio(ratio)
+
     return {
-      timeSpentOnBugs,
-      timeSpentOnIssues,
-      ratio: timeSpentOnIssues / timeSpentOnBugs * 100,
+      issuesTimeSpent: timeSpentOnIssues,
+      bugsTimeSpent: timeSpentOnBugs,
+      ratio,
+      result: ratioResult,
     }
   }
 }
