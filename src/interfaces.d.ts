@@ -18,7 +18,7 @@ export interface IUser {
 
 interface IAuthState {
   user: {
-    accessToken: string
+    token: string
   }
 }
 
