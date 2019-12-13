@@ -1,55 +1,16 @@
 import axios, { AxiosInstance } from 'axios'
 import { format, isWithinInterval } from 'date-fns'
+import { Issue } from '../models/Issue'
+import { User } from '../models/User'
 import { JIRA_METRICS_API_URL } from '../constants'
 import { getJqlInString } from '../utils'
 
-import { IJiraService, IUser, IIssueParameters, IChangelogItem, IIssue } from '../models/Jira.model'
-import { IJiraApiSearchResult, IJiraApiIssue, IJiraApiHistoryItem, IJiraApiUser } from '../models/JiraApi.model'
+import { IJiraService, IIssueParameters, IChangelogItem } from '../models/Jira.model'
+import { IJiraApiSearchResult, IJiraApiUser } from '../models/JiraApi.model'
 
 class JiraService implements IJiraService {
   apiURL: string
   apiInstance: AxiosInstance
-
-  static mapJiraApiIssue (issue: IJiraApiIssue) {
-    const mappedIssue: IIssue = {
-      title: issue.key,
-      type: issue.fields.issuetype.id,
-    }
-
-    if (issue.fields.issuelinks) {
-      mappedIssue.linkedIssues = issue.fields.issuelinks.map((link) => this.mapJiraApiIssue(link.outwardIssue))
-    }
-
-    if (issue.changelog) {
-      mappedIssue.changelog = issue.changelog.histories
-        .map((historyItem: IJiraApiHistoryItem) => {
-          const timeSpentItem = historyItem.items.find((changeItem) => changeItem.field === 'timespent')
-
-          if (!timeSpentItem) {
-            return null
-          }
-
-          return {
-            created: historyItem.created,
-            author: JiraService.mapJiraApiUser(historyItem.author),
-            field: timeSpentItem.field,
-            from: timeSpentItem.from,
-            to: timeSpentItem.to,
-          }
-        })
-        .filter((item: IChangelogItem) => !!item)
-    }
-
-    return mappedIssue
-  }
-
-  static mapJiraApiUser (user: IJiraApiUser): IUser {
-    return {
-      name: user.displayName,
-      email: user.emailAddress,
-      key: user.key,
-    }
-  }
 
   constructor () {
     this.apiURL = process.env.JIRA_API_URL
@@ -64,17 +25,13 @@ class JiraService implements IJiraService {
     }
 
     try {
-      const { data } = await this.apiInstance.get('/myself', {
+      const { data }: { data: IJiraApiUser } = await this.apiInstance.get('/myself', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
 
-      const user: IUser = {
-        email: data.emailAddress,
-        name: data.displayName,
-        key: data.key,
-      }
+      const user = new User(data)
 
       return user
     } catch (e) {
@@ -113,14 +70,12 @@ class JiraService implements IJiraService {
       },
     })
 
-    return data.issues.map(issue => {
-      const mappedIssue = JiraService.mapJiraApiIssue(issue)
-      if (mappedIssue.changelog) {
-        mappedIssue.changelog = mappedIssue.changelog.filter(
-          ({ created }) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
-        )
-      }
-      return mappedIssue
+    return data.issues.map(jiraIssue => {
+      const issue = new Issue(jiraIssue)
+      const filterCondition =
+        ({ created }: IChangelogItem) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
+      issue.filterChangelog(filterCondition)
+      return issue
     })
   }
 
@@ -144,14 +99,12 @@ class JiraService implements IJiraService {
       },
     })
 
-    return data.issues.map(issue => {
-      const mappedIssue = JiraService.mapJiraApiIssue(issue)
-      if (mappedIssue.changelog) {
-        mappedIssue.changelog = mappedIssue.changelog.filter(
-          ({ created }) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
-        )
-      }
-      return mappedIssue
+    return data.issues.map(jiraIssue => {
+      const issue = new Issue(jiraIssue)
+      const filterCondition =
+        ({ created }: IChangelogItem) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
+      issue.filterChangelog(filterCondition)
+      return issue
     })
   }
 }

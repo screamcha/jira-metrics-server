@@ -1,4 +1,6 @@
 import { AxiosInstance } from 'axios'
+import { IIssue } from './Issue'
+import { IUser } from './User'
 
 export enum EIssueType {
   Bug = '10004',
@@ -21,19 +23,6 @@ export interface IIssueParameters {
   startDate: Date
   endDate: Date
   userKey?: string
-}
-
-export interface IUser {
-  email?: string
-  name: string
-  key: string
-}
-
-export interface IIssue {
-  title: string
-  type: string
-  changelog?: IChangelogItem[]
-  linkedIssues?: IIssue[]
 }
 
 export interface IChangelogItem {

@@ -2,7 +2,8 @@ import { jiraService } from './Jira'
 import { ratios } from '../constants'
 
 import { IMetricsService, IComputeValueVsBugsMetricParams } from '../models/Metrics.model'
-import { EIssueType, IIssue, IChangelogItem } from '../models/Jira.model'
+import { EIssueType, IChangelogItem } from '../models/Jira.model'
+import { IIssue } from '../models/Issue'
 
 class MetricsService implements IMetricsService {
   static getResultOfRatio (ratio: number) {

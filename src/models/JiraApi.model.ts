@@ -1,3 +1,5 @@
+import { EIssueType } from './Jira.model'
+
 export interface IJiraApiSearchResult {
   issues: IJiraApiIssue[]
 }
@@ -10,7 +12,7 @@ export interface IJiraApiIssue {
   fields?: {
     issuelinks?: IJiraApiIssueLink[]
     issuetype?: {
-      id: string
+      id: EIssueType
     }
   }
 }
