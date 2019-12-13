@@ -8,6 +8,11 @@ export interface IIssue {
   type: EIssueType
   changelog?: IChangelogItem[]
   linkedIssues?: IIssue[]
+
+  filterChangelog: (
+    condition: (item: IChangelogItem) => boolean
+  ) => void
+  calculateSpentTime: () => number
 }
 
 export class Issue implements IIssue {
@@ -49,5 +54,13 @@ export class Issue implements IIssue {
     if (this.changelog) {
       this.changelog = this.changelog.filter(condition)
     }
+  }
+
+  calculateSpentTime () {
+    return this.changelog.reduce(
+      (result: number, item: IChangelogItem) => (
+        result + Number(item.to) - Number(item.from)
+      ), 0
+    )
   }
 }
