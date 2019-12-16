@@ -53,18 +53,12 @@ class MetricsService implements IMetricsService {
     const relatedBugs = await jiraService.getIssuesByIds(token, { issueIds: bugIds, startDate, endDate })
 
     const timeSpentOnBugs = relatedBugs.reduce(
-      (result: number, issue: IIssue) => {
-        const timeSpentOnIssue = issue.changelog.reduce(
-          (result: number, item: IChangelogItem) => (
-            result + Number(item.to) - Number(item.from)
-          ), 0
-        )
-
-        return result + timeSpentOnIssue
-      }, 0
+      (result: number, issue: IIssue) => (
+        result + issue.calculateSpentTime()
+      ), 0
     )
 
-    const ratio = timeSpentOnIssues / timeSpentOnBugs
+    const ratio = timeSpentOnBugs / timeSpentOnIssues
     const ratioResult = MetricsService.getResultOfRatio(ratio)
 
     return {

@@ -14,7 +14,7 @@ interface IValueVsBugsQuery {
 
 class MetricsController implements IMetricsController {
   async valueVsBugs (ctx: Context) {
-    const { accessToken } = ctx.state.user
+    const { token } = ctx.state.user
     const { startDate, endDate, user: userKey } = ctx.query as IValueVsBugsQuery
 
     if (!startDate && !endDate) {
@@ -22,7 +22,7 @@ class MetricsController implements IMetricsController {
       return
     }
 
-    const result = await metricsService.computeValueVsBugsMetric(accessToken, {
+    const result = await metricsService.computeValueVsBugsMetric(token, {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       userKey,

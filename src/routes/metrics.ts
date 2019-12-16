@@ -6,6 +6,6 @@ import { metricsController } from '../controllers/metrics'
 export const metricsRouter = new Router({ prefix: '/metrics' })
 
 metricsRouter.get('/value-vs-bugs',
-  passport.authenticate('bearer', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   metricsController.valueVsBugs
 )
