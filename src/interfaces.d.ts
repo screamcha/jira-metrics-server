@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa'
 
 interface IContextState {
   user: {
-    accessToken: string
+    token: string
   }
 }
 

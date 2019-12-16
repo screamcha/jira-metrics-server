@@ -10,7 +10,7 @@ interface IAuthController {
 
 class AuthController implements IAuthController {
   async authenticate (ctx: Context) {
-    const { accessToken: token } = ctx.state.user
+    const { token } = ctx.state.user
 
     const response: ISuccessAuthResponse = {
       token,

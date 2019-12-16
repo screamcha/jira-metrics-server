@@ -1,10 +1,10 @@
 import passport from 'koa-passport'
 
-import BearerStrategy from './bearer'
+import JwtStrategy from './jwt'
 import OAuth2Strategy from './oauth2'
 
 export default () => {
-  [BearerStrategy, OAuth2Strategy].forEach(strategy => passport.use(strategy))
+  [JwtStrategy, OAuth2Strategy].forEach(strategy => passport.use(strategy))
 
   return passport.initialize()
 }
