@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import { format, isWithinInterval } from 'date-fns'
 import { Issue } from '../models/Issue'
 import { User } from '../models/User'
-import { JIRA_METRICS_API_URL } from '../constants'
+import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../constants'
 import { getJqlInString } from '../utils'
 
 import { IJiraService, IIssueParameters, IChangelogItem } from '../models/Jira.model'
@@ -40,7 +40,6 @@ class JiraService implements IJiraService {
   }
 
   async getIssues (token: string, { issueTypes, startDate, endDate, userKey }: IIssueParameters) {
-    const dateFormat = 'yyyy-MM-dd'
     const issueTypesString = getJqlInString(issueTypes)
 
     const jqlQuery = `
@@ -48,11 +47,11 @@ class JiraService implements IJiraService {
         AND status in (Dev-complete, Discarded)
         AND
           (
-            (updated >= ${format(startDate, dateFormat)}
-            AND updated <= ${format(endDate, dateFormat)})
+            (updated >= ${format(startDate, DATE_FORMAT)}
+            AND updated <= ${format(endDate, DATE_FORMAT)})
           OR
-            (created >= ${format(startDate, dateFormat)}
-            AND created <= ${format(endDate, dateFormat)})
+            (created >= ${format(startDate, DATE_FORMAT)}
+            AND created <= ${format(endDate, DATE_FORMAT)})
           )
         AND
           assignee = ${userKey}

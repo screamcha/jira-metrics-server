@@ -2,32 +2,60 @@ import nock from 'nock'
 import HttpCodes from 'http-status-codes'
 import { format } from 'date-fns'
 
-import { jiraService, IUser, EIssueType, IIssue } from '../../services/Jira'
+import { jiraService } from '../../services/Jira'
 import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../../constants'
+
+import { EIssueType, IIssueParameters } from '../../models/Jira.model'
+import { IJiraApiSearchResult } from '../../models/JiraApi.model'
+import { Issue } from '../../models/Issue'
+import { IUser } from '../../models/User'
 
 describe('Jira Service', () => {
   const testAuthToken = 'test-auth-key'
   const testIssueParameters = {
     jql: `
-      issueType = ${EIssueType.Bug} 
-        AND status in (Dev-complete, Discarded) 
-        AND updated >= ${format(new Date('2019-01-01'), DATE_FORMAT)}
-        AND updated <= ${format(new Date('2019-12-31'), DATE_FORMAT)}
+      issuetype in ('${EIssueType.Bug}')
+        AND status in (Dev-complete, Discarded)
+        AND
+          (
+            (updated >= ${format(new Date('2019-01-01'), DATE_FORMAT)}
+            AND updated <= ${format(new Date('2019-12-31'), DATE_FORMAT)})
+          OR
+            (created >= ${format(new Date('2019-01-01'), DATE_FORMAT)}
+            AND created <= ${format(new Date('2019-12-31'), DATE_FORMAT)})
+          )
+        AND
+          assignee = user1
     `,
     expand: ['changelog'],
+    fields: ['issuelinks', 'issuetype'],
   }
-  const resultIssues = {
+  const resultIssues: IJiraApiSearchResult = {
     issues: [
       {
-        title: 'issue-1',
+        key: 'issue-1',
+        fields: {
+          issuetype: {
+            id: EIssueType.Dev,
+          },
+        },
         changelog: {
           histories: [
             {
               id: '111',
               author: {
-                name: 'Thrall',
+                displayName: 'Thrall',
                 key: 'thrall-horde',
+                emailAddress: 'thrall@azeroth.com',
               },
+              created: '2019-01-03',
+              items: [
+                {
+                  field: 'timespent',
+                  from: null,
+                  to: '10000',
+                }
+              ],
             }
           ],
         },
@@ -81,27 +109,13 @@ describe('Jira Service', () => {
 
   describe('getIssues method', () => {
     it('returns array of issues for given parameters', async () => {
-      const testParameters = {
+      const testParameters: IIssueParameters = {
         startDate: new Date(2019, 0, 1),
         endDate: new Date(2019, 11, 31),
-        issueType: EIssueType.Bug,
+        issueTypes: [EIssueType.Bug],
+        userKey: 'user1',
       }
-      const testResult: IIssue[] = [
-        {
-          title: 'issue-1',
-          changelog: {
-            histories: [
-              {
-                id: '111',
-                author: {
-                  name: 'Thrall',
-                  key: 'thrall-horde',
-                },
-              }
-            ],
-          },
-        }
-      ]
+      const testResult = resultIssues.issues.map(issue => new Issue(issue))
 
       const result = await jiraService.getIssues(testAuthToken, testParameters)
 
