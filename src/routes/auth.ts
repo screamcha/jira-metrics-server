@@ -11,3 +11,5 @@ authRouter.get(
   '/callback',
   passport.authenticate('oauth2', { session: false }),
   authController.authenticate)
+
+authRouter.post('/refresh', authController.refresh)

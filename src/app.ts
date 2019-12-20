@@ -1,10 +1,12 @@
 import Koa from 'koa'
+import bodyParser from 'koa-bodyparser'
 
 import router from './routes'
 import passportSetup from './passport'
 
 const app = new Koa()
 
+app.use(bodyParser())
 app.use(async (ctx, next) => {
   try {
     await next()
