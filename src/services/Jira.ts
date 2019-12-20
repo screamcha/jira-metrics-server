@@ -1,25 +1,21 @@
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
 import { format, isWithinInterval } from 'date-fns'
+
 import { Issue } from '../models/Issue'
 import { User } from '../models/User'
 import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../constants'
 import { getJqlInString } from '../utils'
 
-import { IJiraService, IIssueParameters, IChangelogItem } from '../models/Jira.model'
+import { IJiraService, IIssueParameters, IChangelogItem, EStatus } from '../models/Jira.model'
 import { IJiraApiSearchResult, IJiraApiUser } from '../models/JiraApi.model'
 
 class JiraService implements IJiraService {
-  apiURL: string
-  apiInstance: AxiosInstance
+  apiURL = process.env.JIRA_API_URL
+  apiInstance = axios.create({
+    baseURL: JIRA_METRICS_API_URL,
+  })
 
-  constructor () {
-    this.apiURL = process.env.JIRA_API_URL
-    this.apiInstance = axios.create({
-      baseURL: JIRA_METRICS_API_URL,
-    })
-  }
-
-  async currentUser (token: string) {
+  public async currentUser (token: string) {
     if (!token) {
       return null
     }
@@ -39,12 +35,12 @@ class JiraService implements IJiraService {
     }
   }
 
-  async getIssues (token: string, { issueTypes, startDate, endDate, userKey }: IIssueParameters) {
+  public async getIssues (token: string, { issueTypes, startDate, endDate, userKey }: IIssueParameters) {
     const issueTypesString = getJqlInString(issueTypes)
 
     const jqlQuery = `
       issuetype in (${issueTypesString})
-        AND status in (Dev-complete, Discarded)
+        AND status in ('${EStatus.DevComplete}', '${EStatus.Discarded}')
         AND
           (
             (updated >= ${format(startDate, DATE_FORMAT)}

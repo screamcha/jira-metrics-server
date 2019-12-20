@@ -3,10 +3,15 @@ import { IIssue } from './Issue'
 import { IUser } from './User'
 
 export enum EIssueType {
-  Bug = '10004',
+  Bug = 'Bug',
   Story = 'Story',
   Dev = 'Dev Task',
   Epic = 'Epic'
+}
+
+export enum EStatus {
+  DevComplete = 'Dev-complete',
+  Discarded = 'Discarded'
 }
 
 export interface IJiraService {
