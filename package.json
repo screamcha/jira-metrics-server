@@ -24,6 +24,7 @@
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "husky": "^4.0.9",
     "jest": "^24.9.0",
     "nock": "^11.7.0",
     "ts-jest": "^24.1.0",
@@ -47,6 +48,7 @@
   "scripts": {
     "start": "ts-node-dev --respawn --transpileOnly ./src/app.ts",
     "build": "tsc",
-    "test": "jest --watchAll --coverage"
+    "test": "jest --watchAll --coverage",
+    "lint": "eslint --fix ./src/*.ts ./src/**/*.ts"
   }
 }
