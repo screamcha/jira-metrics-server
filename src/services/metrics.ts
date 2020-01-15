@@ -2,7 +2,7 @@ import { jiraService } from './Jira'
 import { ratios } from '../constants'
 
 import { IMetricsService, IComputeValueVsBugsMetricParams } from '../models/Metrics.model'
-import { EIssueType } from '../models/Jira.model'
+import { EIssueType, ELinkType } from '../models/Jira.model'
 import { IIssue } from '../models/Issue'
 
 class MetricsService implements IMetricsService {
@@ -37,7 +37,7 @@ class MetricsService implements IMetricsService {
     // #2 - compute time spent on issues with bugs
     const issuesWithBugs = issues.filter((issue: IIssue) => (
       issue.linkedIssues.some(
-        ({ type }) => type === EIssueType.Bug
+        ({ type, parentLinkType }) => type === EIssueType.Bug && parentLinkType === ELinkType.IsCausedBy
       )
     ))
 

@@ -1,4 +1,4 @@
-import { EIssueType } from './Jira.model'
+import { EIssueType, ELinkType } from './Jira.model'
 
 export interface IJiraApiSearchResult {
   issues: IJiraApiIssue[]
@@ -38,5 +38,9 @@ interface IJiraApiHistoryChangeItem {
 
 export interface IJiraApiIssueLink {
   id: string
+  type: {
+    name: string;
+    inward: ELinkType
+  }
   outwardIssue: IJiraApiIssue
 }

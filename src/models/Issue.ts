@@ -1,11 +1,12 @@
 import { User } from './User'
 
 import { IJiraApiIssue, IJiraApiHistoryItem } from './JiraApi.model'
-import { EIssueType, IChangelogItem } from './Jira.model'
+import { EIssueType, IChangelogItem, ELinkType } from './Jira.model'
 
 export interface IIssue {
   title: string
   type: EIssueType
+  parentLinkType?: ELinkType
   changelog?: IChangelogItem[]
   linkedIssues?: IIssue[]
 
@@ -20,13 +21,18 @@ export class Issue implements IIssue {
   type: EIssueType
   changelog: IChangelogItem[]
   linkedIssues: IIssue[]
+  parentLinkType: ELinkType
 
   constructor (issue: IJiraApiIssue) {
     this.title = issue.key
     this.type = issue.fields.issuetype.name
 
     if (issue.fields.issuelinks) {
-      this.linkedIssues = issue.fields.issuelinks.map((link) => new Issue(link.outwardIssue))
+      this.linkedIssues = issue.fields.issuelinks.map((link) => {
+        const childIssue = new Issue(link.outwardIssue)
+        childIssue.parentLinkType = link.type.inward
+        return childIssue
+      })
     }
 
     if (issue.changelog) {

@@ -14,6 +14,10 @@ export enum EStatus {
   Discarded = 'Discarded'
 }
 
+export enum ELinkType {
+  IsCausedBy = 'is caused by'
+}
+
 export interface IJiraService {
   apiURL: string
   apiInstance: AxiosInstance
