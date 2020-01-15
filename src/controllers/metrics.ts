@@ -17,7 +17,7 @@ class MetricsController implements IMetricsController {
     const { token } = ctx.state.user
     const { startDate, endDate, user: userKey } = ctx.query as IValueVsBugsQuery
 
-    if (!startDate && !endDate) {
+    if (!startDate || !endDate || !userKey) {
       ctx.status = 400
       return
     }

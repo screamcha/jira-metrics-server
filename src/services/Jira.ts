@@ -20,19 +20,15 @@ class JiraService implements IJiraService {
       return null
     }
 
-    try {
-      const { data }: { data: IJiraApiUser } = await this.apiInstance.get('/myself', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    const { data }: { data: IJiraApiUser } = await this.apiInstance.get('/myself', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
 
-      const user = new User(data)
+    const user = new User(data)
 
-      return user
-    } catch (e) {
-      return null
-    }
+    return user
   }
 
   public async getIssues (token: string, { issueTypes, startDate, endDate, userKey }: IIssueParameters) {
