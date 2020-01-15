@@ -3,7 +3,7 @@ import { ratios } from '../constants'
 
 import { IMetricsService, IComputeValueVsBugsMetricParams } from '../models/Metrics.model'
 import { EIssueType, ELinkType } from '../models/Jira.model'
-import { IIssue } from '../models/Issue'
+import { Issue } from '../models/Issue'
 
 class MetricsService implements IMetricsService {
   static getResultForRatio (ratio: number) {
@@ -35,7 +35,7 @@ class MetricsService implements IMetricsService {
     })
 
     // #2 - compute time spent on issues with bugs
-    const issuesWithBugs = issues.filter((issue: IIssue) => (
+    const issuesWithBugs = issues.filter((issue: Issue) => (
       issue.linkedIssues.some(
         ({ type, parentLinkType }) => type === EIssueType.Bug && parentLinkType === ELinkType.IsCausedBy
       )
@@ -46,23 +46,23 @@ class MetricsService implements IMetricsService {
       ratioResult = MetricsService.getResultForRatio(ratio)
     } else {
       timeSpentOnIssues = issuesWithBugs.reduce(
-        (result: number, issue: IIssue) => (
+        (result: number, issue: Issue) => (
           result + issue.calculateSpentTime()
         ), 0
       )
 
       // #3 - get all related bugs
-      const bugIds = issuesWithBugs.map((issue: IIssue) => (
+      const bugIds = issuesWithBugs.map((issue: Issue) => (
         issue.linkedIssues
-          .filter(({ type }: IIssue) => type === EIssueType.Bug)
-          .map(({ title }: IIssue) => title)
+          .filter(({ type }: Issue) => type === EIssueType.Bug)
+          .map(({ title }: Issue) => title)
       )).reduce((result: string[], next: string[]) => result.concat(next), [])
 
       if (bugIds.length) {
         const relatedBugs = await jiraService.getIssuesByIds(token, { issueIds: bugIds, startDate, endDate })
 
         timeSpentOnBugs = relatedBugs.reduce(
-          (result: number, issue: IIssue) => (
+          (result: number, issue: Issue) => (
             result + issue.calculateSpentTime()
           ), 0
         )

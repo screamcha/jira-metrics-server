@@ -1,5 +1,4 @@
-import HttpCodes from 'http-status-codes'
-
+import { BAD_REQUEST } from 'http-status-codes'
 import { authService } from '../services/auth'
 
 import { Context } from '../interfaces'
@@ -28,7 +27,7 @@ class AuthController implements IAuthController {
     const { token } = ctx.request.body
 
     if (!token) {
-      ctx.status = HttpCodes.BAD_REQUEST
+      ctx.status = BAD_REQUEST
       return
     }
 

@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import HttpCodes from 'http-status-codes'
+import { OK } from 'http-status-codes'
 import nock from 'nock'
 
 import { DATE_FORMAT, JIRA_METRICS_API_URL } from '../../constants'
@@ -32,7 +32,7 @@ export const resultIssues: IJiraApiSearchResult = {
       key: 'issue-1',
       fields: {
         issuetype: {
-          id: EIssueType.Dev,
+          name: EIssueType.Dev,
         },
       },
       changelog: {
@@ -66,11 +66,11 @@ export const mockApi = () => {
     },
   })
     .get('/myself')
-    .reply(HttpCodes.OK, {
+    .reply(OK, {
       emailAddress: 'test@test.com',
       displayName: 'Varok Saurfang',
       key: 'saurfang',
     })
     .post('/search', testIssueParameters)
-    .reply(HttpCodes.OK, resultIssues)
+    .reply(OK, resultIssues)
 }

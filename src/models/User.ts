@@ -1,12 +1,6 @@
-import { IJiraApiUser } from './JiraApi.model';
+import { IJiraApiUser } from './JiraApi.model'
 
-export interface IUser {
-  email: string
-  name: string
-  key: string
-}
-
-export class User implements IUser {
+export class User {
   email: string
   name: string
   key: string

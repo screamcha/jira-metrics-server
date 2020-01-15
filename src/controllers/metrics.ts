@@ -1,3 +1,4 @@
+import { BAD_REQUEST } from 'http-status-codes'
 import { metricsService } from '../services/metrics'
 
 import { Context } from '../interfaces'
@@ -18,7 +19,7 @@ class MetricsController implements IMetricsController {
     const { startDate, endDate, user: userKey } = ctx.query as IValueVsBugsQuery
 
     if (!startDate || !endDate || !userKey) {
-      ctx.status = 400
+      ctx.status = BAD_REQUEST
       return
     }
 

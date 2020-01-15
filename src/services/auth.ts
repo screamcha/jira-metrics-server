@@ -1,6 +1,5 @@
 import axios from 'axios'
 import jwt from 'jsonwebtoken'
-
 import { JIRA_AUTH_URL } from '../constants'
 
 const authSecret = process.env.AUTH_SECRET

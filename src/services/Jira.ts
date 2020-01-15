@@ -1,10 +1,9 @@
 import axios from 'axios'
 import { format, isWithinInterval } from 'date-fns'
-
 import { Issue } from '../models/Issue'
 import { User } from '../models/User'
-import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../constants'
 import { getJqlInString } from '../utils'
+import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../constants'
 
 import { IJiraService, IIssueParameters, IChangelogItem, EStatus } from '../models/Jira.model'
 import { IJiraApiSearchResult, IJiraApiUser } from '../models/JiraApi.model'

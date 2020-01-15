@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios'
-import { IIssue } from './Issue'
-import { IUser } from './User'
+import { Issue } from './Issue'
+import { User } from './User'
 
 export enum EIssueType {
   Bug = 'Bug',
@@ -21,9 +21,9 @@ export enum ELinkType {
 export interface IJiraService {
   apiURL: string
   apiInstance: AxiosInstance
-  currentUser: (token: string) => Promise<IUser>
-  getIssues: (token: string, parameters: IIssueParameters) => Promise<IIssue[]>
-  getIssuesByIds: (token: string, parameters: IIssueParameters) => Promise<IIssue[]>
+  currentUser: (token: string) => Promise<User>
+  getIssues: (token: string, parameters: IIssueParameters) => Promise<Issue[]>
+  getIssuesByIds: (token: string, parameters: IIssueParameters) => Promise<Issue[]>
 }
 
 export interface IIssueParameters {
@@ -35,7 +35,7 @@ export interface IIssueParameters {
 }
 
 export interface IChangelogItem {
-  author: IUser
+  author: User
   created: string
   field: string
   from: string

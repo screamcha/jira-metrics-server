@@ -1,6 +1,5 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
-
 import { authController } from '../controllers/auth'
 
 export const authRouter = new Router({ prefix: '/auth' })

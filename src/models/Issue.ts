@@ -3,24 +3,11 @@ import { User } from './User'
 import { IJiraApiIssue, IJiraApiHistoryItem } from './JiraApi.model'
 import { EIssueType, IChangelogItem, ELinkType } from './Jira.model'
 
-export interface IIssue {
-  title: string
-  type: EIssueType
-  parentLinkType?: ELinkType
-  changelog?: IChangelogItem[]
-  linkedIssues?: IIssue[]
-
-  filterChangelog: (
-    condition: (item: IChangelogItem) => boolean
-  ) => void
-  calculateSpentTime: () => number
-}
-
-export class Issue implements IIssue {
+export class Issue {
   title: string
   type: EIssueType
   changelog: IChangelogItem[]
-  linkedIssues: IIssue[]
+  linkedIssues: Issue[]
   parentLinkType: ELinkType
 
   constructor (issue: IJiraApiIssue) {
@@ -62,7 +49,7 @@ export class Issue implements IIssue {
     }
   }
 
-  calculateSpentTime () {
+  calculateSpentTime (): number {
     return this.changelog.reduce(
       (result: number, item: IChangelogItem) => (
         result + Number(item.to) - Number(item.from)
