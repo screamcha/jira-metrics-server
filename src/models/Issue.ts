@@ -23,7 +23,7 @@ export class Issue implements IIssue {
 
   constructor (issue: IJiraApiIssue) {
     this.title = issue.key
-    this.type = issue.fields.issuetype.id
+    this.type = issue.fields.issuetype.name
 
     if (issue.fields.issuelinks) {
       this.linkedIssues = issue.fields.issuelinks.map((link) => new Issue(link.outwardIssue))

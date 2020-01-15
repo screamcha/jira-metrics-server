@@ -12,7 +12,7 @@ export interface IJiraApiIssue {
   fields?: {
     issuelinks?: IJiraApiIssueLink[]
     issuetype?: {
-      id: EIssueType
+      name: EIssueType
     }
   }
 }

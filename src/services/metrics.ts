@@ -6,8 +6,8 @@ import { EIssueType } from '../models/Jira.model'
 import { IIssue } from '../models/Issue'
 
 class MetricsService implements IMetricsService {
-  static getResultOfRatio (ratio: number) {
-    let result = ''
+  static getResultForRatio (ratio: number) {
+    let result = ratios[0].result
 
     ratios.forEach((templateRatio: { value: number, result: string }) => {
       if (ratio < templateRatio.value) {
@@ -22,6 +22,10 @@ class MetricsService implements IMetricsService {
     token: string,
     { startDate, endDate, userKey }: IComputeValueVsBugsMetricParams
   ) {
+    let ratio: number
+    let ratioResult: string
+    let timeSpentOnIssues: number = 0
+    let timeSpentOnBugs: number = 0
     // #1 - get tasks for person for period
     const issues = await jiraService.getIssues(token, {
       issueTypes: [EIssueType.Dev, EIssueType.Epic, EIssueType.Story],
@@ -37,29 +41,36 @@ class MetricsService implements IMetricsService {
       )
     ))
 
-    const timeSpentOnIssues = issuesWithBugs.reduce(
-      (result: number, issue: IIssue) => (
-        result + issue.calculateSpentTime()
-      ), 0
-    )
+    if (!issuesWithBugs.length) {
+      ratio = 0
+      ratioResult = MetricsService.getResultForRatio(ratio)
+    } else {
+      timeSpentOnIssues = issuesWithBugs.reduce(
+        (result: number, issue: IIssue) => (
+          result + issue.calculateSpentTime()
+        ), 0
+      )
 
-    // #3 - get all related bugs
-    const bugIds = issuesWithBugs.map((issue: IIssue) => (
-      issue.linkedIssues
-        .filter(({ type }: IIssue) => type === EIssueType.Bug)
-        .map(({ title }: IIssue) => title)
-    )).reduce((result: string[], next: string[]) => result.concat(next), [])
+      // #3 - get all related bugs
+      const bugIds = issuesWithBugs.map((issue: IIssue) => (
+        issue.linkedIssues
+          .filter(({ type }: IIssue) => type === EIssueType.Bug)
+          .map(({ title }: IIssue) => title)
+      )).reduce((result: string[], next: string[]) => result.concat(next), [])
 
-    const relatedBugs = await jiraService.getIssuesByIds(token, { issueIds: bugIds, startDate, endDate })
+      if (bugIds.length) {
+        const relatedBugs = await jiraService.getIssuesByIds(token, { issueIds: bugIds, startDate, endDate })
 
-    const timeSpentOnBugs = relatedBugs.reduce(
-      (result: number, issue: IIssue) => (
-        result + issue.calculateSpentTime()
-      ), 0
-    )
+        timeSpentOnBugs = relatedBugs.reduce(
+          (result: number, issue: IIssue) => (
+            result + issue.calculateSpentTime()
+          ), 0
+        )
+      }
 
-    const ratio = timeSpentOnBugs / timeSpentOnIssues
-    const ratioResult = MetricsService.getResultOfRatio(ratio)
+      ratio = timeSpentOnBugs / timeSpentOnIssues
+      ratioResult = MetricsService.getResultForRatio(ratio)
+    }
 
     return {
       issuesTimeSpent: timeSpentOnIssues,

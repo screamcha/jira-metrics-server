@@ -8,7 +8,6 @@ const app = new Koa()
 
 app.use(async (ctx, next) => {
   try {
-    console.log(ctx.url)
     await next()
   } catch (error) {
     console.error(error.stack)
