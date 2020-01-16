@@ -7,12 +7,14 @@ export class Issue {
   title: string
   type: EIssueType
   changelog: IChangelogItem[]
+  componentIds: string[]
   linkedIssues: Issue[]
   parentLinkType: ELinkType
 
   constructor (issue: IJiraApiIssue) {
     this.title = issue.key
     this.type = issue.fields.issuetype.name
+    this.componentIds = issue.fields.components.map(component => component.id)
 
     if (issue.fields.issuelinks) {
       this.linkedIssues = issue.fields.issuelinks.map((link) => {
@@ -43,17 +45,33 @@ export class Issue {
     }
   }
 
-  filterChangelog (condition: (item: IChangelogItem) => boolean) {
+  public filterChangelog (condition: (item: IChangelogItem) => boolean) {
     if (this.changelog) {
       this.changelog = this.changelog.filter(condition)
     }
   }
 
-  calculateSpentTime (): number {
+  public calculateSpentTime (): number {
     return this.changelog.reduce(
       (result: number, item: IChangelogItem) => (
         result + Number(item.to) - Number(item.from)
       ), 0
     )
+  }
+
+  public static aggregateByComponenId (issues: Issue[]) {
+    const componentIdMap: {[key: string]: Issue[]} = {}
+
+    issues.forEach(issue => {
+      issue.componentIds.forEach(componentId => {
+        if (!componentIdMap[componentId]) {
+          componentIdMap[componentId] = []
+        }
+
+        componentIdMap[componentId].push(issue)
+      })
+    })
+
+    return componentIdMap
   }
 }

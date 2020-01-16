@@ -34,6 +34,11 @@ export const resultIssues: IJiraApiSearchResult = {
         issuetype: {
           name: EIssueType.Dev,
         },
+        components: [
+          {
+            id: 'component 1',
+          }
+        ],
       },
       changelog: {
         histories: [

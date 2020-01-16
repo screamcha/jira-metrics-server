@@ -1,5 +1,3 @@
-import { AxiosInstance } from 'axios'
-import { Issue } from './Issue'
 import { User } from './User'
 
 export enum EIssueType {
@@ -18,12 +16,9 @@ export enum ELinkType {
   IsCausedBy = 'is caused by'
 }
 
-export interface IJiraService {
-  apiURL: string
-  apiInstance: AxiosInstance
-  currentUser: (token: string) => Promise<User>
-  getIssues: (token: string, parameters: IIssueParameters) => Promise<Issue[]>
-  getIssuesByIds: (token: string, parameters: IIssueParameters) => Promise<Issue[]>
+export interface IDates {
+  startDate: Date
+  endDate: Date
 }
 
 export interface IIssueParameters {
@@ -32,6 +27,14 @@ export interface IIssueParameters {
   startDate: Date
   endDate: Date
   userKey?: string
+}
+
+export interface IGetByIdParameters {
+  id: string
+}
+
+export interface IGetIssueOptions {
+  includeLinkedIssues?: boolean
 }
 
 export interface IChangelogItem {

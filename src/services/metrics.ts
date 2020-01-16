@@ -1,7 +1,7 @@
 import { jiraService } from './Jira'
 import { ratios } from '../constants'
 
-import { IMetricsService, IComputeValueVsBugsMetricParams } from '../models/Metrics.model'
+import { IMetricsService, IComputeValueVsBugsMetricParams, IComputeComponentHealthMetricParams, IComponentHealthResult } from '../models/Metrics.model'
 import { EIssueType, ELinkType } from '../models/Jira.model'
 import { Issue } from '../models/Issue'
 
@@ -32,7 +32,7 @@ class MetricsService implements IMetricsService {
       startDate,
       endDate,
       userKey,
-    })
+    }, { includeLinkedIssues: true })
 
     // #2 - compute time spent on issues with bugs
     const issuesWithBugs = issues.filter((issue: Issue) => (
@@ -77,6 +77,67 @@ class MetricsService implements IMetricsService {
       bugsTimeSpent: timeSpentOnBugs,
       ratio,
       result: ratioResult,
+    }
+  }
+
+  async computeComponentHealthMetric (
+    token: string,
+    { startDate, endDate }: IComputeComponentHealthMetricParams
+  ) {
+    // #1 - get all close bugs
+    const bugs = await jiraService.getIssues(token, {
+      issueTypes: [EIssueType.Bug],
+      startDate,
+      endDate,
+    }, { includeLinkedIssues: false })
+
+    const bugsByComponent = Issue.aggregateByComponenId(bugs)
+
+    // #2 - get info about components
+    const componentIds = Object.keys(bugsByComponent)
+    const components = await Promise.all(
+      componentIds.map(id => jiraService.getComponentById(token, { id }))
+    )
+
+    // #3 = compute bug time per component
+    const bugTimePerComponentMap: {[key: string]: number} = {}
+    componentIds.forEach(id => {
+      const spentTime = bugsByComponent[id].reduce(
+        (result: number, issue: Issue) => (
+          result + issue.calculateSpentTime()
+        ), 0
+      )
+
+      bugTimePerComponentMap[id] = spentTime
+    })
+
+    // #4 - compute bug time per leader
+    const bugTimePerLeaderMap: {[key: string]: number} = {}
+    components.forEach(component => {
+      if (!bugTimePerLeaderMap[component.leader.key]) {
+        bugTimePerLeaderMap[component.leader.key] = 0
+      }
+
+      bugTimePerLeaderMap[component.leader.key] += bugTimePerComponentMap[component.id]
+    })
+
+    const leaderKeys = Object.keys(bugTimePerLeaderMap)
+
+    const equalShare = leaderKeys.reduce((result: number, next: string) => result + bugTimePerLeaderMap[next], 0) / leaderKeys.length
+
+    // #5 - compute shares
+    const results: IComponentHealthResult[] = leaderKeys.map(key => {
+      const ratio = (bugTimePerLeaderMap[key] - equalShare) / equalShare
+      return {
+        leader: key,
+        ratio,
+        result: '',
+      }
+    })
+
+    return {
+      equalShare,
+      ratios: results,
     }
   }
 }
