@@ -9,21 +9,43 @@ export const OAUTH_CALLBACK_URL = `${process.env.ORIGIN}/api/auth/callback`
 
 export const DATE_FORMAT = 'yyyy-MM-dd'
 
-export const ratios = [
+export enum ratioResult {
+  NotPerforming = 'not performing',
+  Underperforming = 'underperforming',
+  MeetsExpectations = 'meets expectations',
+  ExceedsExpectations = 'exceeds expectations'
+}
+
+export const valueVsBugsRatios = [
   {
     value: 1,
-    result: 'not performing',
+    result: ratioResult.NotPerforming,
   },
   {
     value: 0.4,
-    result: 'underperforming',
+    result: ratioResult.Underperforming,
   },
   {
     value: 0.11,
-    result: 'meets expectations',
+    result: ratioResult.MeetsExpectations,
   },
   {
     value: 0.04,
-    result: 'exceeds expectations',
+    result: ratioResult.ExceedsExpectations,
+  }
+]
+
+export const componentHealthRatios = [
+  {
+    value: 1,
+    result: ratioResult.Underperforming,
+  },
+  {
+    value: 0.2,
+    result: ratioResult.MeetsExpectations,
+  },
+  {
+    value: -0.2,
+    result: ratioResult.ExceedsExpectations,
   }
 ]

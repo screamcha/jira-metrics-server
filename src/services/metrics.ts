@@ -1,15 +1,15 @@
 import { jiraService } from './Jira'
-import { ratios } from '../constants'
+import { valueVsBugsRatios, componentHealthRatios } from '../constants'
 
 import { IMetricsService, IComputeValueVsBugsMetricParams, IComputeComponentHealthMetricParams, IComponentHealthResult } from '../models/Metrics.model'
 import { EIssueType, ELinkType } from '../models/Jira.model'
 import { Issue } from '../models/Issue'
 
 class MetricsService implements IMetricsService {
-  static getResultForRatio (ratio: number) {
-    let result = ratios[0].result
+  static getResultForRatio (ratio: number, metricRatios: Array<{value: number, result: string}>) {
+    let result = metricRatios[0].result
 
-    ratios.forEach((templateRatio: { value: number, result: string }) => {
+    metricRatios.forEach((templateRatio: { value: number, result: string }) => {
       if (ratio < templateRatio.value) {
         result = templateRatio.result
       }
@@ -43,7 +43,7 @@ class MetricsService implements IMetricsService {
 
     if (!issuesWithBugs.length) {
       ratio = 0
-      ratioResult = MetricsService.getResultForRatio(ratio)
+      ratioResult = MetricsService.getResultForRatio(ratio, valueVsBugsRatios)
     } else {
       timeSpentOnIssues = issuesWithBugs.reduce(
         (result: number, issue: Issue) => (
@@ -69,7 +69,7 @@ class MetricsService implements IMetricsService {
       }
 
       ratio = timeSpentOnBugs / timeSpentOnIssues
-      ratioResult = MetricsService.getResultForRatio(ratio)
+      ratioResult = MetricsService.getResultForRatio(ratio, valueVsBugsRatios)
     }
 
     return {
@@ -131,7 +131,7 @@ class MetricsService implements IMetricsService {
       return {
         leader: key,
         ratio,
-        result: '',
+        result: MetricsService.getResultForRatio(ratio, componentHealthRatios),
       }
     })
 
