@@ -16,7 +16,7 @@ export enum ratioResult {
   ExceedsExpectations = 'exceeds expectations'
 }
 
-export const valueVsBugsRatios = [
+export const valueVsBugsRatios = Object.freeze([
   {
     value: 1,
     result: ratioResult.NotPerforming,
@@ -33,9 +33,9 @@ export const valueVsBugsRatios = [
     value: 0.04,
     result: ratioResult.ExceedsExpectations,
   }
-]
+])
 
-export const componentHealthRatios = [
+export const componentHealthRatios = Object.freeze([
   {
     value: 1,
     result: ratioResult.Underperforming,
@@ -48,4 +48,4 @@ export const componentHealthRatios = [
     value: -0.2,
     result: ratioResult.ExceedsExpectations,
   }
-]
+])
