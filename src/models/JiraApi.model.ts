@@ -11,9 +11,12 @@ export interface IJiraApiIssue {
   }
   fields?: {
     issuelinks?: IJiraApiIssueLink[]
-    issuetype?: {
+    issuetype: {
       name: EIssueType
     }
+    components: Array<{
+      id: string
+    }>
   }
 }
 
@@ -43,4 +46,10 @@ export interface IJiraApiIssueLink {
     inward: ELinkType
   }
   outwardIssue: IJiraApiIssue
+}
+
+export interface IJiraApiComponent {
+  id: string
+  name: string
+  lead: IJiraApiUser
 }

@@ -1,14 +1,14 @@
 import axios from 'axios'
 import { format, isWithinInterval } from 'date-fns'
+import { Component } from '../models/Component'
 import { Issue } from '../models/Issue'
 import { User } from '../models/User'
-import { getJqlInString } from '../utils'
 import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../constants'
 
-import { IJiraService, IIssueParameters, IChangelogItem, EStatus } from '../models/Jira.model'
-import { IJiraApiSearchResult, IJiraApiUser } from '../models/JiraApi.model'
+import { IIssueParameters, IChangelogItem, IGetIssueOptions, IDates, EStatus, IGetByIdParameters } from '../models/Jira.model'
+import { IJiraApiSearchResult, IJiraApiUser, IJiraApiIssue, IJiraApiComponent } from '../models/JiraApi.model'
 
-class JiraService implements IJiraService {
+class JiraService {
   apiURL = process.env.JIRA_API_URL
   apiInstance = axios.create({
     baseURL: JIRA_METRICS_API_URL,
@@ -30,10 +30,81 @@ class JiraService implements IJiraService {
     return user
   }
 
-  public async getIssues (token: string, { issueTypes, startDate, endDate, userKey }: IIssueParameters) {
-    const issueTypesString = getJqlInString(issueTypes)
+  public async getIssues (token: string, params: IIssueParameters, { includeLinkedIssues }: IGetIssueOptions) {
+    const { startDate, endDate } = params
+    const jqlQuery = this.getJqlQuery(params)
+    const expandFields = ['changelog']
+    const fields = ['issuetype', 'components']
+    if (includeLinkedIssues) {
+      fields.push('issuelinks')
+    }
+
+    const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
+      jql: jqlQuery,
+      expand: expandFields,
+      fields,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return data.issues.map(this.mapJiraIssue({ startDate, endDate }))
+  }
+
+  public async getIssuesByIds (token: string, { issueIds, startDate, endDate }: IIssueParameters) {
+    const issueKeysString = this.getJqlInString(issueIds)
 
     const jqlQuery = `
+      issueKey IN (${issueKeysString})
+    `
+
+    const expandFields = ['changelog']
+    const fields = ['issuetype', 'components']
+
+    const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
+      jql: jqlQuery,
+      expand: expandFields,
+      fields,
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return data.issues.map(this.mapJiraIssue({ startDate, endDate }))
+  }
+
+  public async getComponentById (token: string, { id }: IGetByIdParameters) {
+    const { data }: {data: IJiraApiComponent} = await this.apiInstance.get(`/component/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return new Component(data)
+  }
+
+  private mapJiraIssue ({ startDate, endDate }: IDates) {
+    return function (jiraIssue: IJiraApiIssue): Issue {
+      const issue = new Issue(jiraIssue)
+      const filterCondition =
+          ({ created }: IChangelogItem) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
+      issue.filterChangelog(filterCondition)
+      return issue
+    }
+  }
+
+  private getJqlInString = (values: string[]): string => {
+    return values.reduce(
+      (result: string, nextValue: string) => `${result}, '${nextValue}'`, ''
+    ).slice(2)
+  }
+
+  private getJqlQuery ({ startDate, endDate, issueTypes, userKey }: IIssueParameters) {
+    const issueTypesString = this.getJqlInString(issueTypes)
+
+    let jqlQuery = `
       issuetype in (${issueTypesString})
         AND status in ('${EStatus.DevComplete}', '${EStatus.Discarded}')
         AND
@@ -44,58 +115,15 @@ class JiraService implements IJiraService {
             (created >= ${format(startDate, DATE_FORMAT)}
             AND created <= ${format(endDate, DATE_FORMAT)})
           )
-        AND
-          assignee = ${userKey}
-    `
-    const expandFields = ['changelog']
-    const fields = ['issuelinks', 'issuetype']
-
-    const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
-      jql: jqlQuery,
-      expand: expandFields,
-      fields,
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    return data.issues.map(jiraIssue => {
-      const issue = new Issue(jiraIssue)
-      const filterCondition =
-        ({ created }: IChangelogItem) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
-      issue.filterChangelog(filterCondition)
-      return issue
-    })
-  }
-
-  async getIssuesByIds (token: string, { issueIds, startDate, endDate }: IIssueParameters) {
-    const issueKeysString = getJqlInString(issueIds)
-
-    const jqlQuery = `
-      issueKey IN (${issueKeysString})
     `
 
-    const expandFields = ['changelog']
-    const fields = ['issuetype']
+    if (userKey) {
+      jqlQuery = `
+        ${jqlQuery} AND assignee = ${userKey}
+      `
+    }
 
-    const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
-      jql: jqlQuery,
-      expand: expandFields,
-      fields,
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    return data.issues.map(jiraIssue => {
-      const issue = new Issue(jiraIssue)
-      const filterCondition =
-        ({ created }: IChangelogItem) => isWithinInterval(new Date(created), { start: startDate, end: endDate })
-      issue.filterChangelog(filterCondition)
-      return issue
-    })
+    return jqlQuery
   }
 }
 

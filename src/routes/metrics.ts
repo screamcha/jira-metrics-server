@@ -8,3 +8,8 @@ metricsRouter.get('/value-vs-bugs',
   passport.authenticate('jwt', { session: false }),
   metricsController.valueVsBugs
 )
+
+metricsRouter.get('/component-health',
+  passport.authenticate('jwt', { session: false }),
+  metricsController.componentHealth
+)
