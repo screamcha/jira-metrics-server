@@ -14,7 +14,9 @@ export class Issue {
   constructor (issue: IJiraApiIssue) {
     this.title = issue.key
     this.type = issue.fields.issuetype.name
-    this.componentIds = issue.fields.components.map(component => component.id)
+    if (issue.fields.components) {
+      this.componentIds = issue.fields.components.map(component => component.id)
+    }
 
     if (issue.fields.issuelinks) {
       this.linkedIssues = issue.fields.issuelinks.map((link) => {

@@ -16,5 +16,6 @@ app.use(async (ctx, next) => {
 app.use(bodyParser())
 app.use(passportSetup())
 app.use(router.routes())
+app.use(router.allowedMethods())
 
 app.listen(process.env.PORT, () => console.log(`listening on ${process.env.PORT}`))

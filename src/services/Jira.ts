@@ -3,7 +3,6 @@ import { format, isWithinInterval } from 'date-fns'
 import { Component } from '../models/Component'
 import { Issue } from '../models/Issue'
 import { User } from '../models/User'
-import { getJqlInString } from '../utils'
 import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../constants'
 
 import { IIssueParameters, IChangelogItem, IGetIssueOptions, IDates, EStatus, IGetByIdParameters } from '../models/Jira.model'
@@ -54,14 +53,14 @@ class JiraService {
   }
 
   public async getIssuesByIds (token: string, { issueIds, startDate, endDate }: IIssueParameters) {
-    const issueKeysString = getJqlInString(issueIds)
+    const issueKeysString = this.getJqlInString(issueIds)
 
     const jqlQuery = `
       issueKey IN (${issueKeysString})
     `
 
     const expandFields = ['changelog']
-    const fields = ['issuetype']
+    const fields = ['issuetype', 'components']
 
     const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
       jql: jqlQuery,
@@ -96,8 +95,14 @@ class JiraService {
     }
   }
 
+  private getJqlInString = (values: string[]): string => {
+    return values.reduce(
+      (result: string, nextValue: string) => `${result}, '${nextValue}'`, ''
+    ).slice(2)
+  }
+
   private getJqlQuery ({ startDate, endDate, issueTypes, userKey }: IIssueParameters) {
-    const issueTypesString = getJqlInString(issueTypes)
+    const issueTypesString = this.getJqlInString(issueTypes)
 
     let jqlQuery = `
       issuetype in (${issueTypesString})
