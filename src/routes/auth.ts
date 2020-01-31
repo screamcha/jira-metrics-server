@@ -1,16 +1,14 @@
 import Router from 'koa-router'
 import passport from 'koa-passport'
-
-import authController from '../controllers/auth'
-
-import { IAuthState } from '../interfaces'
-import { Context } from 'koa'
+import { authController } from '../controllers/auth'
 
 export const authRouter = new Router({ prefix: '/auth' })
 
 authRouter.get('/', passport.authenticate('oauth2', { session: false }))
 
-authRouter.get<IAuthState, Context>(
+authRouter.get(
   '/callback',
   passport.authenticate('oauth2', { session: false }),
   authController.authenticate)
+
+authRouter.post('/refresh', authController.refresh)

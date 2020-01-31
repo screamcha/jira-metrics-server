@@ -7,12 +7,15 @@ export default new JwtStrategy({
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: authSecret,
 }, async (payload: { accessToken: string, refreshToken: string }, done: Function) => {
-  console.log(payload)
-  const user = await jiraService.currentUser(payload.accessToken)
+  try {
+    const user = await jiraService.currentUser(payload.accessToken)
 
-  if (!user) {
-    return done('Invalid user')
+    if (!user) {
+      return done(null, false)
+    }
+
+    return done(null, { token: payload.accessToken })
+  } catch (error) {
+    return done(error)
   }
-
-  return done(null, user)
 })

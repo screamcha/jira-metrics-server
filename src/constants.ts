@@ -6,3 +6,24 @@ export const JIRA_API_URL = 'https://api.atlassian.com'
 export const JIRA_METRICS_API_URL = `${JIRA_API_URL}/ex/jira/ede4ead3-6fc6-4433-828d-3b798cb4b1a7/rest/api/2`
 
 export const OAUTH_CALLBACK_URL = `${process.env.ORIGIN}/api/auth/callback`
+
+export const DATE_FORMAT = 'yyyy-MM-dd'
+
+export const ratios = [
+  {
+    value: 1,
+    result: 'not performing',
+  },
+  {
+    value: 0.4,
+    result: 'underperforming',
+  },
+  {
+    value: 0.11,
+    result: 'meets expectations',
+  },
+  {
+    value: 0.04,
+    result: 'exceeds expectations',
+  }
+]
