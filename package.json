@@ -43,10 +43,11 @@
     "koa-router": "^7.4.0",
     "passport-jwt": "^4.0.0",
     "passport-oauth2": "^1.5.0",
-    "query-string": "^6.9.0"
+    "query-string": "^6.9.0",
+    "winston": "^3.2.1"
   },
   "scripts": {
-    "start": "ts-node-dev --respawn --transpileOnly ./src/app.ts",
+    "start:dev": "NODE_ENV=development ts-node-dev --respawn --transpileOnly ./src/app.ts",
     "build": "tsc",
     "test": "jest --watchAll --coverage",
     "lint": "eslint --fix ./src/*.ts ./src/**/*.ts"

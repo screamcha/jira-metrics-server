@@ -5,3 +5,5 @@ services:
     ports: 
      - "80:${PORT}"
     env_file: .env
+    environment:
+      - NODE_ENV=production
