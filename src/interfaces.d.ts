@@ -2,7 +2,8 @@ import { ParameterizedContext } from 'koa'
 
 interface IContextState {
   user: {
-    token: string
+    token: string,
+    projectId: string
   }
 }
 
@@ -21,4 +22,16 @@ export interface IGetMyselfFields {
 
 export interface IGetMyselfResponse extends IGetMyselfFields {
   [key: string]: any
+}
+
+export enum ratioResult {
+  NotPerforming = 'not performing',
+  Underperforming = 'underperforming',
+  MeetsExpectations = 'meets expectations',
+  ExceedsExpectations = 'exceeds expectations'
+}
+
+export interface IRatioResult {
+  value: number
+  result: ratioResult
 }

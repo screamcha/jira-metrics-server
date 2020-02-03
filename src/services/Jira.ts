@@ -1,36 +1,43 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { format, isWithinInterval } from 'date-fns'
 import { Component } from '../models/Component'
 import { Issue } from '../models/Issue'
 import { User } from '../models/User'
-import { JIRA_METRICS_API_URL, DATE_FORMAT } from '../constants'
+import { JIRA_API_URL, DATE_FORMAT } from '../constants'
 
-import { IIssueParameters, IChangelogItem, IGetIssueOptions, IDates, EStatus, IGetByIdParameters } from '../models/Jira.model'
+import { IIssueParameters, IChangelogItem, IGetIssueOptions, IDates, EStatus } from '../models/Jira.model'
 import { IJiraApiSearchResult, IJiraApiUser, IJiraApiIssue, IJiraApiComponent } from '../models/JiraApi.model'
 
-class JiraService {
-  apiURL = process.env.JIRA_API_URL
-  apiInstance = axios.create({
-    baseURL: JIRA_METRICS_API_URL,
-  })
+export class JiraService {
+  apiURL: string
+  apiInstance: AxiosInstance
+  token: string
 
-  public async currentUser (token: string) {
-    if (!token) {
+  constructor (projectId: string, token?: string) {
+    this.apiURL = JIRA_API_URL
+    this.apiInstance = axios.create({
+      baseURL: `${JIRA_API_URL}/ex/jira/${projectId}/rest/api/2`,
+    })
+
+    if (token) {
+      this.token = token
+      this.apiInstance.defaults.headers.common.Authorization = `Bearer ${token}`
+    }
+  }
+
+  public async currentUser () {
+    if (!this.token) {
       return null
     }
 
-    const { data }: { data: IJiraApiUser } = await this.apiInstance.get('/myself', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const { data }: { data: IJiraApiUser } = await this.apiInstance.get('/myself')
 
     const user = new User(data)
 
     return user
   }
 
-  public async getIssues (token: string, params: IIssueParameters, { includeLinkedIssues }: IGetIssueOptions) {
+  public async getIssues (params: IIssueParameters, { includeLinkedIssues }: IGetIssueOptions) {
     const { startDate, endDate } = params
     const jqlQuery = this.getJqlQuery(params)
     const expandFields = ['changelog']
@@ -43,16 +50,12 @@ class JiraService {
       jql: jqlQuery,
       expand: expandFields,
       fields,
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
 
     return data.issues.map(this.mapJiraIssue({ startDate, endDate }))
   }
 
-  public async getIssuesByIds (token: string, { issueIds, startDate, endDate }: IIssueParameters) {
+  public async getIssuesByIds ({ issueIds, startDate, endDate }: IIssueParameters) {
     const issueKeysString = this.getJqlInString(issueIds)
 
     const jqlQuery = `
@@ -66,21 +69,13 @@ class JiraService {
       jql: jqlQuery,
       expand: expandFields,
       fields,
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
 
     return data.issues.map(this.mapJiraIssue({ startDate, endDate }))
   }
 
-  public async getComponentById (token: string, { id }: IGetByIdParameters) {
-    const { data }: {data: IJiraApiComponent} = await this.apiInstance.get(`/component/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+  public async getComponentById (id: string) {
+    const { data }: {data: IJiraApiComponent} = await this.apiInstance.get(`/component/${id}`)
 
     return new Component(data)
   }
@@ -126,5 +121,3 @@ class JiraService {
     return jqlQuery
   }
 }
-
-export const jiraService = new JiraService()

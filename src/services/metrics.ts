@@ -1,15 +1,16 @@
-import { jiraService } from './Jira'
+import { JiraService } from './Jira'
 import { valueVsBugsRatios, componentHealthRatios } from '../constants'
 
 import { IMetricsService, IComputeValueVsBugsMetricParams, IComputeComponentHealthMetricParams, IComponentHealthResult } from '../models/Metrics.model'
 import { EIssueType, ELinkType } from '../models/Jira.model'
 import { Issue } from '../models/Issue'
+import { IRatioResult } from '../interfaces'
 
 class MetricsService implements IMetricsService {
-  static getResultForRatio (ratio: number, metricRatios: Array<{value: number, result: string}>) {
+  static getResultForRatio (ratio: number, metricRatios: readonly IRatioResult[]) {
     let result = metricRatios[0].result
 
-    metricRatios.forEach((templateRatio: { value: number, result: string }) => {
+    metricRatios.forEach((templateRatio: IRatioResult) => {
       if (ratio < templateRatio.value) {
         result = templateRatio.result
       }
@@ -20,14 +21,16 @@ class MetricsService implements IMetricsService {
 
   async computeValueVsBugsMetric (
     token: string,
+    projectId: string,
     { startDate, endDate, userKey }: IComputeValueVsBugsMetricParams
   ) {
+    const jiraService = new JiraService(projectId, token)
     let ratio: number
     let ratioResult: string
     let timeSpentOnIssues: number = 0
     let timeSpentOnBugs: number = 0
     // #1 - get tasks for person for period
-    const issues = await jiraService.getIssues(token, {
+    const issues = await jiraService.getIssues({
       issueTypes: [EIssueType.Dev, EIssueType.Epic, EIssueType.Story],
       startDate,
       endDate,
@@ -59,7 +62,7 @@ class MetricsService implements IMetricsService {
       )).reduce((result: string[], next: string[]) => result.concat(next), [])
 
       if (bugIds.length) {
-        const relatedBugs = await jiraService.getIssuesByIds(token, { issueIds: bugIds, startDate, endDate })
+        const relatedBugs = await jiraService.getIssuesByIds({ issueIds: bugIds, startDate, endDate })
 
         timeSpentOnBugs = relatedBugs.reduce(
           (result: number, issue: Issue) => (
@@ -82,10 +85,12 @@ class MetricsService implements IMetricsService {
 
   async computeComponentHealthMetric (
     token: string,
+    projectId: string,
     { startDate, endDate }: IComputeComponentHealthMetricParams
   ) {
     // #1 - get all close bugs
-    const bugs = await jiraService.getIssues(token, {
+    const jiraService = new JiraService(projectId, token)
+    const bugs = await jiraService.getIssues({
       issueTypes: [EIssueType.Bug],
       startDate,
       endDate,
@@ -96,7 +101,7 @@ class MetricsService implements IMetricsService {
     // #2 - get info about components
     const componentIds = Object.keys(bugsByComponent)
     const components = await Promise.all(
-      componentIds.map(id => jiraService.getComponentById(token, { id }))
+      componentIds.map(id => jiraService.getComponentById(id))
     )
 
     // #3 = compute bug time per component
