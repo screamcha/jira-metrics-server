@@ -2,8 +2,6 @@ FROM node:13
 
 WORKDIR /usr/src/app
 
-RUN npm i -g yarn
-
 COPY package.json ./
 COPY yarn.lock ./
 
@@ -14,4 +12,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ['node' 'dist/app.js']
+CMD ["node", "dist/app.js"]
