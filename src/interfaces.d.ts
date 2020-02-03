@@ -24,14 +24,7 @@ export interface IGetMyselfResponse extends IGetMyselfFields {
   [key: string]: any
 }
 
-export enum ratioResult {
-  NotPerforming = 'not performing',
-  Underperforming = 'underperforming',
-  MeetsExpectations = 'meets expectations',
-  ExceedsExpectations = 'exceeds expectations'
-}
-
-export interface IRatioResult {
+export interface IRatioResult<T> {
   value: number
-  result: ratioResult
+  result: T
 }

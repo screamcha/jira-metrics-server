@@ -1,16 +1,15 @@
 import { JiraService } from './Jira'
-import { valueVsBugsRatios, componentHealthRatios } from '../constants'
+import { valueVsBugsRatios, componentHealthRatios, metricsRatio } from '../constants'
 
 import { IMetricsService, IComputeValueVsBugsMetricParams, IComputeComponentHealthMetricParams, IComponentHealthResult } from '../models/Metrics.model'
 import { EIssueType, ELinkType } from '../models/Jira.model'
 import { Issue } from '../models/Issue'
-import { IRatioResult } from '../interfaces'
 
 class MetricsService implements IMetricsService {
-  static getResultForRatio (ratio: number, metricRatios: readonly IRatioResult[]) {
+  static getResultForRatio (ratio: number, metricRatios: readonly metricsRatio[]) {
     let result = metricRatios[0].result
 
-    metricRatios.forEach((templateRatio: IRatioResult) => {
+    metricRatios.forEach((templateRatio: metricsRatio) => {
       if (ratio < templateRatio.value) {
         result = templateRatio.result
       }
