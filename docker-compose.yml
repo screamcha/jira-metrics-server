@@ -4,6 +4,4 @@ services:
     build: .
     ports: 
      - "80:${PORT}"
-    # environment: 
-    #   - PORT=4321
     env_file: .env
