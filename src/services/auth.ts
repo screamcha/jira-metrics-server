@@ -1,22 +1,22 @@
 import axios from 'axios'
 import jwt from 'jsonwebtoken'
-import { JIRA_AUTH_URL } from '../constants'
+import { JIRA_AUTH_URL, JIRA_API_URL } from '../constants'
 
 const authSecret = process.env.AUTH_SECRET
 const clientId = process.env.JIRA_CLIENT_ID
 const clientSecret = process.env.JIRA_SECRET_KEY
-
-interface IAuthService {
-  refreshAuthToken: (token: string) => Promise<string> | any
-}
 
 interface IRefreshTokenResponse {
   access_token: string
   expires_in: number
 }
 
-class AuthService implements IAuthService {
-  public async refreshAuthToken (token: string) {
+interface IAccessibleResourceResponse {
+  id: string
+}
+
+class AuthService {
+  public async refreshAuthToken (token: string): Promise<string> {
     const { refreshToken } = jwt.decode(token) as { refreshToken: string }
 
     if (!refreshToken) {
@@ -33,6 +33,17 @@ class AuthService implements IAuthService {
     const authToken = jwt.sign({ accessToken: data.access_token, refreshToken }, authSecret)
 
     return authToken
+  }
+
+  public async getProjectId (token: string): Promise<string> {
+    const { data }: { data: IAccessibleResourceResponse[] } = await axios.get(`${JIRA_API_URL}/oauth/token/accessible-resources`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    })
+
+    return data[0].id
   }
 }
 

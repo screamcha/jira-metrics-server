@@ -1,6 +1,7 @@
 import { Strategy as OAuth2Strategy, VerifyCallback } from 'passport-oauth2'
 import jwt from 'jsonwebtoken'
 import queryString from 'query-string'
+import { authService } from '../services/auth'
 import { JIRA_AUTH_URL, OAUTH_CALLBACK_URL } from '../constants'
 
 const authSecret = process.env.AUTH_SECRET
@@ -21,7 +22,8 @@ export default new OAuth2Strategy({
   clientID: process.env.JIRA_CLIENT_ID,
   clientSecret: process.env.JIRA_SECRET_KEY,
   callbackURL: OAUTH_CALLBACK_URL,
-}, (accessToken: string, refreshToken: string, profile: any, cb: VerifyCallback) => {
-  const token = jwt.sign({ accessToken, refreshToken }, authSecret)
+}, async (accessToken: string, refreshToken: string, profile: any, cb: VerifyCallback) => {
+  const projectId = await authService.getProjectId(accessToken)
+  const token = jwt.sign({ accessToken, refreshToken, projectId }, authSecret)
   return cb(null, { token })
 })
