@@ -21,7 +21,7 @@ interface IComponentHealthQuery {
 
 class MetricsController implements IMetricsController {
   async valueVsBugs (ctx: Context) {
-    const { token } = ctx.state.user
+    const { token, projectId } = ctx.state.user
     const { startDate, endDate, user: userKey } = ctx.query as IValueVsBugsQuery
 
     if (!startDate || !endDate || !userKey) {
@@ -29,7 +29,7 @@ class MetricsController implements IMetricsController {
       return
     }
 
-    const result = await metricsService.computeValueVsBugsMetric(token, {
+    const result = await metricsService.computeValueVsBugsMetric(token, projectId, {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       userKey,
@@ -40,7 +40,7 @@ class MetricsController implements IMetricsController {
   }
 
   async componentHealth (ctx: Context) {
-    const { token } = ctx.state.user
+    const { token, projectId } = ctx.state.user
     const { startDate, endDate } = ctx.query as IComponentHealthQuery
 
     if (!startDate || !endDate) {
@@ -48,7 +48,7 @@ class MetricsController implements IMetricsController {
       return
     }
 
-    const result = await metricsService.computeComponentHealthMetric(token, {
+    const result = await metricsService.computeComponentHealthMetric(token, projectId, {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
     })

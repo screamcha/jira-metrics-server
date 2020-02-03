@@ -1,10 +1,12 @@
 export interface IMetricsService {
   computeValueVsBugsMetric: (
     token: string,
+    projectId: string,
     params: IComputeValueVsBugsMetricParams
   ) => Promise<IComputeValueVsBugsMetricResponse>
   computeComponentHealthMetric: (
     token: string,
+    projectId: string,
     params: IComputeComponentHealthMetricParams
   ) => Promise<IComputeComponentHealthMetricResponse>
 }

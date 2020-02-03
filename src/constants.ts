@@ -1,9 +1,9 @@
 import dotenv from 'dotenv'
+import { IRatioResult } from './interfaces'
 dotenv.config()
 
 export const JIRA_AUTH_URL = 'https://auth.atlassian.com'
 export const JIRA_API_URL = 'https://api.atlassian.com'
-export const JIRA_METRICS_API_URL = `${JIRA_API_URL}/ex/jira/ede4ead3-6fc6-4433-828d-3b798cb4b1a7/rest/api/2`
 
 export const OAUTH_CALLBACK_URL = `${process.env.ORIGIN}/api/auth/callback`
 
@@ -15,8 +15,9 @@ export enum ratioResult {
   MeetsExpectations = 'meets expectations',
   ExceedsExpectations = 'exceeds expectations'
 }
+export type metricsRatio = IRatioResult<ratioResult>
 
-export const valueVsBugsRatios = Object.freeze([
+export const valueVsBugsRatios: readonly metricsRatio[] = Object.freeze([
   {
     value: 1,
     result: ratioResult.NotPerforming,
@@ -35,7 +36,7 @@ export const valueVsBugsRatios = Object.freeze([
   }
 ])
 
-export const componentHealthRatios = Object.freeze([
+export const componentHealthRatios: readonly metricsRatio[] = Object.freeze([
   {
     value: 1,
     result: ratioResult.Underperforming,
