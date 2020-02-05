@@ -3,7 +3,7 @@ import { IRatioResult } from './interfaces'
 dotenv.config()
 
 export const JIRA_AUTH_URL = 'https://auth.atlassian.com'
-export const JIRA_API_URL = 'https://api.atlassian.com'
+export const JIRA_API_URL = 'https://nstest.atlassian.net'
 
 export const OAUTH_CALLBACK_URL = `${process.env.ORIGIN}/api/auth/callback`
 

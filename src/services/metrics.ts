@@ -19,11 +19,10 @@ class MetricsService implements IMetricsService {
   }
 
   async computeValueVsBugsMetric (
-    token: string,
-    projectId: string,
+    authHeader: string,
     { startDate, endDate, userKey }: IComputeValueVsBugsMetricParams
   ) {
-    const jiraService = new JiraService(projectId, token)
+    const jiraService = new JiraService(authHeader)
     let ratio: number
     let ratioResult: string
     let timeSpentOnIssues: number = 0
@@ -83,12 +82,11 @@ class MetricsService implements IMetricsService {
   }
 
   async computeComponentHealthMetric (
-    token: string,
-    projectId: string,
+    authHeader: string,
     { startDate, endDate }: IComputeComponentHealthMetricParams
   ) {
     // #1 - get all close bugs
-    const jiraService = new JiraService(projectId, token)
+    const jiraService = new JiraService(authHeader)
     const bugs = await jiraService.getIssues({
       issueTypes: [EIssueType.Bug],
       startDate,

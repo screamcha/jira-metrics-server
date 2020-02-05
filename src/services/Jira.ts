@@ -3,7 +3,7 @@ import { format, isWithinInterval } from 'date-fns'
 import { Component } from '../models/Component'
 import { Issue } from '../models/Issue'
 import { User } from '../models/User'
-import { JIRA_API_URL, DATE_FORMAT } from '../constants'
+import { DATE_FORMAT } from '../constants'
 
 import { IIssueParameters, IChangelogItem, IGetIssueOptions, IDates, EStatus } from '../models/Jira.model'
 import { IJiraApiSearchResult, IJiraApiUser, IJiraApiIssue, IJiraApiComponent } from '../models/JiraApi.model'
@@ -14,9 +14,9 @@ export class JiraService {
   authHeader: string
 
   constructor (authHeader: string) {
-    this.apiURL = JIRA_API_URL
+    this.apiURL = process.env.JIRA_DOMAIN
     this.apiInstance = axios.create({
-      baseURL: `${JIRA_API_URL}/rest/api/2`,
+      baseURL: `${this.apiURL}/rest/api/2`,
     })
 
     if (authHeader) {

@@ -21,15 +21,15 @@ interface IComponentHealthQuery {
 
 class MetricsController implements IMetricsController {
   async valueVsBugs (ctx: Context) {
-    const { token, projectId } = ctx.state.user
     const { startDate, endDate, user: userKey } = ctx.query as IValueVsBugsQuery
+    const authHeader = ctx.headers.authorization
 
     if (!startDate || !endDate || !userKey) {
       ctx.status = BAD_REQUEST
       return
     }
 
-    const result = await metricsService.computeValueVsBugsMetric(token, projectId, {
+    const result = await metricsService.computeValueVsBugsMetric(authHeader, {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       userKey,
@@ -40,15 +40,15 @@ class MetricsController implements IMetricsController {
   }
 
   async componentHealth (ctx: Context) {
-    const { token, projectId } = ctx.state.user
     const { startDate, endDate } = ctx.query as IComponentHealthQuery
+    const authHeader = ctx.headers.authorization
 
     if (!startDate || !endDate) {
       ctx.status = BAD_REQUEST
       return
     }
 
-    const result = await metricsService.computeComponentHealthMetric(token, projectId, {
+    const result = await metricsService.computeComponentHealthMetric(authHeader, {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
     })
