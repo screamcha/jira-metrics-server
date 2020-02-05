@@ -11,22 +11,22 @@ import { IJiraApiSearchResult, IJiraApiUser, IJiraApiIssue, IJiraApiComponent } 
 export class JiraService {
   apiURL: string
   apiInstance: AxiosInstance
-  token: string
+  authHeader: string
 
-  constructor (projectId: string, token?: string) {
+  constructor (authHeader: string) {
     this.apiURL = JIRA_API_URL
     this.apiInstance = axios.create({
-      baseURL: `${JIRA_API_URL}/ex/jira/${projectId}/rest/api/2`,
+      baseURL: `${JIRA_API_URL}/rest/api/2`,
     })
 
-    if (token) {
-      this.token = token
-      this.apiInstance.defaults.headers.common.Authorization = `Bearer ${token}`
+    if (authHeader) {
+      this.authHeader = authHeader
+      this.apiInstance.defaults.headers.common.Authorization = authHeader
     }
   }
 
   public async currentUser () {
-    if (!this.token) {
+    if (!this.authHeader) {
       return null
     }
 
@@ -45,6 +45,12 @@ export class JiraService {
     if (includeLinkedIssues) {
       fields.push('issuelinks')
     }
+
+    console.log({
+      jql: jqlQuery,
+      expand: expandFields,
+      fields,
+    })
 
     const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
       jql: jqlQuery,
