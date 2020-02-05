@@ -46,12 +46,6 @@ export class JiraService {
       fields.push('issuelinks')
     }
 
-    console.log({
-      jql: jqlQuery,
-      expand: expandFields,
-      fields,
-    })
-
     const { data }: { data: IJiraApiSearchResult } = await this.apiInstance.post('/search', {
       jql: jqlQuery,
       expand: expandFields,
