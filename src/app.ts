@@ -2,7 +2,6 @@ import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
 
 import router from './routes'
-import passportSetup from './passport'
 import logger from './logger'
 
 const app = new Koa()
@@ -15,7 +14,6 @@ app.use(async (ctx, next) => {
   }
 })
 app.use(bodyParser())
-app.use(passportSetup())
 app.use(router.routes())
 app.use(router.allowedMethods())
 
