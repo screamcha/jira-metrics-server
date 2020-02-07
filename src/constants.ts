@@ -2,11 +2,6 @@ import dotenv from 'dotenv'
 import { IRatioResult } from './interfaces'
 dotenv.config()
 
-export const JIRA_AUTH_URL = 'https://auth.atlassian.com'
-export const JIRA_API_URL = 'https://nstest.atlassian.net'
-
-export const OAUTH_CALLBACK_URL = `${process.env.ORIGIN}/api/auth/callback`
-
 export const DATE_FORMAT = 'yyyy-MM-dd'
 
 export enum ratioResult {
