@@ -17,29 +17,15 @@ Here you can find the guide about how to configure and use it.
 2. Clone the repository.
 3. Create **.env** file in the root of the project and add variables to it. You can copy **.env.example** to use it as a template.
 4. Build and run the container from the docker-compose file.
-5. Your app will be hosted on **80** port.
 
 ---
 
 ## API Overview
 
 ```
-GET /api/auth
-```
-Provides access token for the application. Based on Jira Oauth 2.0. It's required to give access to the resources of Jira by the user so the endpoint must be called from any browser.
-
-### Response object:
-```
-{ "token":"sample token" }
-```
-The token from the response is used to authorize subsequent requests using **Bearer** strategy.
-
----
-
-```
 GET /api/metrics/value-vs-bugs?startDate=${date}&endDate=${date}&user=${username}
 ```
-Computes *Adding value vs bugs* metric for user. **Requires bearer authentication**.
+Computes *Adding value vs bugs* metric for user. **Requires basic authentication**.
 
 ### Response object:
 ```
@@ -56,7 +42,7 @@ Computes *Adding value vs bugs* metric for user. **Requires bearer authenticatio
 ```
 GET /api/metrics/component-health?startDate=${date}&endDate=${date}
 ```
-Computes *Component health* metric for all components of a project. **Requires bearer authentication**.
+Computes *Component health* metric for all components of a project. **Requires basic authentication**.
 
 ### Response object:
 ```
@@ -81,15 +67,3 @@ Computes *Component health* metric for all components of a project. **Requires b
     ]
 }
 ```
-
----
-
-```
-POST /api/auth/refresh
-
-body: {
-  "token": "expired token"
-}
-```
-
-Pass expired token to refresh. Collect working token from the response.
