@@ -116,11 +116,11 @@ class MetricsService implements IMetricsService {
     // #4 - compute bug time per leader
     const bugTimePerLeaderMap: {[key: string]: number} = {}
     components.forEach(component => {
-      if (!bugTimePerLeaderMap[component.leader.key]) {
-        bugTimePerLeaderMap[component.leader.key] = 0
+      if (!bugTimePerLeaderMap[component.leader.name]) {
+        bugTimePerLeaderMap[component.leader.name] = 0
       }
 
-      bugTimePerLeaderMap[component.leader.key] += bugTimePerComponentMap[component.id]
+      bugTimePerLeaderMap[component.leader.name] += bugTimePerComponentMap[component.id]
     })
 
     const leaderKeys = Object.keys(bugTimePerLeaderMap)
@@ -132,6 +132,7 @@ class MetricsService implements IMetricsService {
       const ratio = (bugTimePerLeaderMap[key] - equalShare) / equalShare
       return {
         leader: key,
+        bugTime: bugTimePerLeaderMap[key],
         ratio,
         result: MetricsService.getResultForRatio(ratio, componentHealthRatios),
       }

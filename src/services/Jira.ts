@@ -114,7 +114,7 @@ export class JiraService {
 
     if (userKey) {
       jqlQuery = `
-        ${jqlQuery} AND assignee = ${userKey}
+        ${jqlQuery} AND assignee = "${userKey}"
       `
     }
 
