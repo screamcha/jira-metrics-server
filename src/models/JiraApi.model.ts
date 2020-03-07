@@ -45,11 +45,11 @@ export interface IJiraApiIssueLink {
     name: string;
     inward: ELinkType
   }
-  outwardIssue: IJiraApiIssue
+  outwardIssue?: IJiraApiIssue
 }
 
 export interface IJiraApiComponent {
   id: string
   name: string
-  lead: IJiraApiUser
+  lead?: IJiraApiUser
 }
