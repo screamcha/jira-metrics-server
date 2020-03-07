@@ -20,10 +20,12 @@ export class Issue {
 
     if (issue.fields.issuelinks) {
       this.linkedIssues = issue.fields.issuelinks.map((link) => {
-        const childIssue = new Issue(link.outwardIssue)
-        childIssue.parentLinkType = link.type.inward
-        return childIssue
-      })
+        if (link.outwardIssue) {
+          const childIssue = new Issue(link.outwardIssue)
+          childIssue.parentLinkType = link.type.inward
+          return childIssue
+        }
+      }).filter(link => !!link)
     }
 
     if (issue.changelog) {
