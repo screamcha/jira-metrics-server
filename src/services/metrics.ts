@@ -97,9 +97,9 @@ class MetricsService implements IMetricsService {
 
     // #2 - get info about components
     const componentIds = Object.keys(bugsByComponent)
-    const components = await Promise.all(
+    const components = (await Promise.all(
       componentIds.map(id => jiraService.getComponentById(id))
-    )
+    )).filter(component => !!component.leader)
 
     // #3 = compute bug time per component
     const bugTimePerComponentMap: {[key: string]: number} = {}

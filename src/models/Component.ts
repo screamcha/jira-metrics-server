@@ -10,6 +10,8 @@ export class Component {
   constructor (component: IJiraApiComponent) {
     this.id = component.id
     this.name = component.name
-    this.leader = new User(component.lead)
+    if (component.lead) {
+      this.leader = new User(component.lead)
+    }
   }
 }
