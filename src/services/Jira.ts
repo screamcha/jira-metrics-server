@@ -12,12 +12,14 @@ export class JiraService {
   apiURL: string
   apiInstance: AxiosInstance
   authHeader: string
+  projectKey: string
 
-  constructor (authHeader: string) {
+  constructor (authHeader: string, projectKey: string) {
     this.apiURL = process.env.JIRA_DOMAIN
     this.apiInstance = axios.create({
       baseURL: `${this.apiURL}/rest/api/2`,
     })
+    this.projectKey = projectKey
 
     if (authHeader) {
       this.authHeader = authHeader
@@ -101,6 +103,7 @@ export class JiraService {
 
     let jqlQuery = `
       issuetype in (${issueTypesString})
+        AND project = ${this.projectKey}
         AND status in ('${EStatus.DevComplete}', '${EStatus.Discarded}')
         AND
           (

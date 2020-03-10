@@ -12,24 +12,26 @@ interface IValueVsBugsQuery {
   startDate: string
   endDate: string
   user: string
+  project: string
 }
 
 interface IComponentHealthQuery {
   startDate: string
   endDate: string
+  project: string
 }
 
 class MetricsController implements IMetricsController {
   async valueVsBugs (ctx: Context) {
-    const { startDate, endDate, user: userKey } = ctx.query as IValueVsBugsQuery
+    const { startDate, endDate, user: userKey, project: projectKey } = ctx.query as IValueVsBugsQuery
     const authHeader = ctx.headers.authorization
 
-    if (!startDate || !endDate || !userKey) {
+    if (!startDate || !endDate || !userKey || !projectKey) {
       ctx.status = BAD_REQUEST
       return
     }
 
-    const result = await metricsService.computeValueVsBugsMetric(authHeader, {
+    const result = await metricsService.computeValueVsBugsMetric(authHeader, projectKey, {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       userKey,
@@ -40,15 +42,15 @@ class MetricsController implements IMetricsController {
   }
 
   async componentHealth (ctx: Context) {
-    const { startDate, endDate } = ctx.query as IComponentHealthQuery
+    const { startDate, endDate, project: projectKey } = ctx.query as IComponentHealthQuery
     const authHeader = ctx.headers.authorization
 
-    if (!startDate || !endDate) {
+    if (!startDate || !endDate || !projectKey) {
       ctx.status = BAD_REQUEST
       return
     }
 
-    const result = await metricsService.computeComponentHealthMetric(authHeader, {
+    const result = await metricsService.computeComponentHealthMetric(authHeader, projectKey, {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
     })
